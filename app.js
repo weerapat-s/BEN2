@@ -175,11 +175,25 @@ async function loadAdminDashboard() {
         const response = await fetch(SCRIPT_URL); const data = await response.json();
         adminTableBody.innerHTML = "";
 
+        // คำนวณสรุปข้อมูลสำหรับ Dashboard
+        let statTotal = document.getElementById('statTotal');
+        let statPending = document.getElementById('statPending');
+        let statProgress = document.getElementById('statProgress');
+        let statDone = document.getElementById('statDone');
+        
+        if (statTotal) statTotal.innerText = data.length;
+        if (statPending) statPending.innerText = data.filter(t => t.status === 'รอรับเรื่อง').length;
+        if (statProgress) statProgress.innerText = data.filter(t => t.status === 'กำลังดำเนินการ').length;
+        if (statDone) statDone.innerText = data.filter(t => t.status === 'เสร็จสิ้น').length;
+
         data.reverse().forEach(ticket => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><b>${ticket.ticket_id}</b><br><small>${ticket.reporter_name}</small></td>
                 <td>${ticket.issue_detail}<br><small style="color:var(--accent);">${ticket.location}</small></td>
+                <td style="text-align: center;">
+                    ${ticket.image_url !== '-' ? `<a href="${ticket.image_url}" target="_blank" style="color:var(--accent); text-decoration: none;"><i class="fas fa-image fa-2x"></i><br><small>ดูรูป</small></a>` : '<span style="color:var(--text-muted);">-</span>'}
+                </td>
                 <td>
                     <select id="status_${ticket.ticket_id}">
                         <option value="รอรับเรื่อง" ${ticket.status === 'รอรับเรื่อง' ? 'selected' : ''}>รอรับเรื่อง</option>
@@ -196,7 +210,7 @@ async function loadAdminDashboard() {
             `;
             adminTableBody.appendChild(tr);
         });
-    } catch (error) { adminTableBody.innerHTML = "<tr><td colspan='5'>โหลดข้อมูลไม่สำเร็จ</td></tr>"; }
+    } catch (error) { adminTableBody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>โหลดข้อมูลไม่สำเร็จ</td></tr>"; }
 }
 
 // ฟังก์ชันเวลากดปุ่ม "บันทึก" ในหน้าช่าง

@@ -54,14 +54,40 @@
                     class="fas fa-sign-out-alt"></i> ออกจากระบบ</a>
         </nav>
         <header style="padding: 2rem 0 1rem 0;">
+            <h2><i class="fas fa-chart-line"></i> แดชบอร์ดสรุปข้อมูล</h2>
+        </header>
+
+        <!-- แผนภาพสรุปข้อมูล -->
+        <section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+            <div class="card" style="text-align: center; padding: 1.5rem;">
+                <h3 id="statTotal" style="font-size: 2.5rem; color: #fff; margin-bottom: 0.5rem;">0</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem;"><i class="fas fa-ticket-alt"></i> งานทั้งหมด</p>
+            </div>
+            <div class="card" style="text-align: center; padding: 1.5rem;">
+                <h3 id="statPending" style="font-size: 2.5rem; color: #ff6b6b; margin-bottom: 0.5rem;">0</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem;"><i class="fas fa-clock"></i> รอรับเรื่อง</p>
+            </div>
+            <div class="card" style="text-align: center; padding: 1.5rem;">
+                <h3 id="statProgress" style="font-size: 2.5rem; color: #feca57; margin-bottom: 0.5rem;">0</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem;"><i class="fas fa-spinner fa-spin"></i> กำลังดำเนินการ</p>
+            </div>
+            <div class="card" style="text-align: center; padding: 1.5rem;">
+                <h3 id="statDone" style="font-size: 2.5rem; color: #1dd1a1; margin-bottom: 0.5rem;">0</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem;"><i class="fas fa-check-circle"></i> เสร็จสิ้น</p>
+            </div>
+        </section>
+
+        <header style="padding: 1rem 0 1rem 0;">
             <h2><i class="fas fa-tasks"></i> จัดการรายการแจ้งซ่อม</h2>
         </header>
+        
         <div class="table-container">
             <table>
                 <thead>
                     <tr>
                         <th>รหัสซ่อม / ผู้แจ้ง</th>
                         <th>อาการ / สถานที่</th>
+                        <th>รูปภาพ</th>
                         <th>ปรับสถานะ</th>
                         <th>ข้อความถึงผู้แจ้ง (ระบุเหตุผล/นัดหมาย)</th>
                         <th>บันทึก</th>
@@ -69,7 +95,7 @@
                 </thead>
                 <tbody id="adminTableBody">
                     <tr>
-                        <td colspan="5" style="text-align:center;">กำลังโหลดข้อมูล...</td>
+                        <td colspan="6" style="text-align:center;">กำลังโหลดข้อมูล...</td>
                     </tr>
                 </tbody>
             </table>
