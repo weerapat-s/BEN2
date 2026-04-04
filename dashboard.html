@@ -3,170 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>แจ้งซ่อมและติดตามสถานะ - BEN2</title>
+    <title>ติดตามสถานะ - ระบบแจ้งซ่อม BEN2</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* ตกแต่งตารางให้เข้ากับธีม Dark Mode */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #fff;
+            text-align: left;
+        }
+        th {
+            padding: 1rem;
+            background: rgba(0,0,0,0.3);
+            color: var(--accent, #FFD700);
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            vertical-align: top;
+        }
+        tr:hover td {
+            background: rgba(255,255,255,0.02);
+        }
+    </style>
 </head>
 <body>
     <div class="bg-gradient"></div>
 
     <div class="container animate-fade">
-        <nav>
-            <div class="logo">
-                <a href="index.html" style="text-decoration:none; color:inherit;"><i class="fas fa-tools"></i> BEN2 Maintenance</a>
+        <nav style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0;">
+            <div class="logo" style="font-weight: bold; font-size: 1.2rem;">
+                <a href="index.html" style="color: inherit; text-decoration: none;">
+                    <i class="fas fa-tools" style="color: var(--accent, #FFD700);"></i> BEN2 Maintenance
+                </a>
             </div>
-            <!-- Auth section removed since we migrated to Google Sheets -->
-            <div style="flex:1"></div>
-            <a href="admin.html" class="btn btn-outline" style="text-decoration:none; font-size:0.8rem;"><i class="fas fa-user-shield"></i> เข้าสู่ระบบช่าง (Admin)</a>
+            <div>
+                <a href="admin.html" class="btn btn-outline" style="text-decoration: none; padding: 0.5rem 1rem; font-size: 0.9rem;">
+                    <i class="fas fa-user-cog"></i> เข้าสู่ระบบช่าง (Admin)
+                </a>
+            </div>
         </nav>
 
-        <section class="private-content">
-            <div class="grid grid-cols-2">
-                <!-- Form Section -->
-                <div class="card">
-                    <h2 style="margin-bottom:1.5rem; color:var(--accent)"><i class="fas fa-plus-circle"></i> แจ้งซ่อมใหม่ (ด่วน)</h2>
-                    <form id="ticket-form">
-                        <div class="form-group">
-                            <label><i class="fas fa-user"></i> ชื่อผู้แจ้ง</label>
-                            <input type="text" id="reporter-name" placeholder="ชื่อ-สกุล" required>
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-tv"></i> ประเภทอุปกรณ์</label>
-                            <input type="text" id="equipment-type" placeholder="เช่น ทีวี, ลำโพง, โปรเจคเตอร์" required>
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-map-marker-alt"></i> สถานที่/ห้อง</label>
-                            <input type="text" id="location" placeholder="เช่น อาคาร 1 ห้อง 114" required>
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-exclamation-triangle"></i> รายละเอียดอาการชำรุด</label>
-                            <textarea id="issue-detail" rows="4" placeholder="ระบุอาการชำรุดที่พบโดยละเอียด" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-camera"></i> แนบรูปภาพประกอบ (ถ้ามี)</label>
-                            <input type="file" id="image-file" accept="image/*" style="border: 1px dashed rgba(212,175,55,0.3); padding: 1.5rem; cursor: pointer;">
-                        </div>
-                        <button type="submit" class="btn btn-primary" style="width:100%; padding:1rem;" id="submit-btn">
-                            <i class="fas fa-paper-plane"></i> ส่งรายงานแจ้งซ่อม
-                        </button>
-                    </form>
-                </div>
+        <header style="padding: 2rem 0 1rem 0; text-align: left;">
+            <h2 style="display: flex; justify-content: space-between; align-items: center; margin: 0;">
+                <span><i class="fas fa-clipboard-list" style="color: var(--accent, #FFD700);"></i> รายการแจ้งซ่อมทั้งหมด</span>
+                <button onclick="loadDashboard()" class="btn btn-outline" style="padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">
+                    <i class="fas fa-sync-alt"></i> รีเฟรชข้อมูล
+                </button>
+            </h2>
+        </header>
 
-                <!-- Stats/Instructions Section -->
-                <div>
-                    <div id="list" style="margin-top:0;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                            <h2 style="margin: 0; color:var(--accent)"><i class="fas fa-clipboard-list"></i> รายการแจ้งซ่อมทั้งหมด</h2>
-                            <button id="refresh-btn" class="btn btn-outline" style="padding: 0.5rem;"><i class="fas fa-sync-alt"></i></button>
-                        </div>
-                        <div id="tickets-list" class="grid" style="gap:1rem; max-height: 800px; overflow-y: auto; padding-right: 0.5rem;">
-                            <!-- Tickets populated by app.js -->
-                            <div class="card" style="text-align:center; color:var(--text-muted)">กำลังโหลดข้อความ...</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <footer style="text-align:center; margin-top:6rem; padding: 2rem 0; border-top: 1px solid rgba(255,255,255,0.05); color:var(--text-muted); font-size:0.8rem;">
-            © 2026 BEN2 Maintenance System
-        </footer>
-    </div>
-
-    <!-- Success Modal -->
-    <div id="success-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center;">
-        <div class="card animate-fade" style="max-width:400px; text-align:center;">
-            <i class="fas fa-check-circle" style="font-size:3rem; color:var(--success); margin-bottom:1rem;"></i>
-            <h2>ส่งรายงานสำเร็จ!</h2>
-            <p style="color:var(--text-muted); margin-bottom:2rem;">ช่างจะรีบดำเนินการตรวจสอบให้เร็วที่สุด</p>
-            <button onclick="document.getElementById('success-modal').style.display='none'" class="btn btn-outline" style="width:100%">ตกลง</button>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>รหัสซ่อม</th>
+                        <th>อุปกรณ์ (สถานที่)</th>
+                        <th>ผู้แจ้ง</th>
+                        <th>สถานะ</th>
+                        <th>รูปภาพ</th>
+                    </tr>
+                </thead>
+                <tbody id="ticketTableBody">
+                    <tr><td colspan="5" style="text-align:center; padding: 2rem;">กำลังโหลดข้อมูล... <i class="fas fa-spinner fa-spin"></i></td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="index.html" class="btn btn-primary" style="text-decoration: none;">
+                <i class="fas fa-plus"></i> กลับไปหน้าแจ้งซ่อม
+            </a>
         </div>
     </div>
 
-    <script type="module">
-        import { submitTicket, fetchTickets } from './app.js';
-        
-        const form = document.getElementById('ticket-form');
-        const submitBtn = document.getElementById('submit-btn');
-        const successModal = document.getElementById('success-modal');
-        const listContainer = document.getElementById('tickets-list');
-        const refreshBtn = document.getElementById('refresh-btn');
-
-        form.onsubmit = async (e) => {
-            e.preventDefault();
-            
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังส่งข้อมูล...';
-
-            const ticketData = {
-                reporter_name: document.getElementById('reporter-name').value,
-                equipment_type: document.getElementById('equipment-type').value,
-                location: document.getElementById('location').value,
-                issue_detail: document.getElementById('issue-detail').value
-            };
-            
-            const fileInput = document.getElementById('image-file');
-            const imageFile = fileInput.files.length > 0 ? fileInput.files[0] : null;
-
-            const success = await submitTicket(ticketData, imageFile);
-            
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> ส่งรายงานแจ้งซ่อม';
-
-            if (success) {
-                form.reset();
-                successModal.style.display = 'flex';
-                loadTickets(); // Refresh list automatically
-            } else {
-                alert('เกิดข้อผิดพลาดในการส่งข้อมูล โปรดตรวจสอบการ Deploy (Anyone) ใน Apps Script');
-            }
-        };
-
-        const getStatusClass = (status) => {
-            if (status === 'รอดำเนินการ') return 'status-pending';
-            if (status === 'กำลังดำเนินการ') return 'status-progress';
-            if (status === 'ซ่อมเสร็จสิ้น') return 'status-done';
-            return '';
-        };
-
-        async function loadTickets() {
-            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            refreshBtn.disabled = true;
-
-            const tickets = await fetchTickets();
-            
-            if (tickets.length === 0) {
-                listContainer.innerHTML = '<div class="card" style="text-align:center; color:var(--text-muted)">ยังไม่มีรายการแจ้งซ่อม หรือไม่สามารถเชื่อมต่อฐานข้อมูลได้</div>';
-            } else {
-                // Reverse to show newest first
-                const reversed = [...tickets].reverse();
-                listContainer.innerHTML = reversed.map(ticket => `
-                    <div class="card animate-fade" style="padding: 1rem;">
-                        <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:0.5rem;">
-                            <div>
-                                <h4 style="color:var(--accent); margin:0;">${ticket.equipment_type}</h4>
-                                <p style="font-size:0.8rem; color:var(--text-muted); margin:0;">${ticket.location}</p>
-                            </div>
-                            <span class="badge ${getStatusClass(ticket.status)}" style="font-size:0.7rem;">${ticket.status}</span>
-                        </div>
-                        <p style="margin-bottom:0.5rem; font-size:0.85rem">${ticket.issue_detail}</p>
-                        <div style="font-size:0.75rem; color:var(--text-muted);">
-                            <i class="fas fa-user"></i> ${ticket.reporter_name || 'ไม่ระบุ'} | <i class="fas fa-clock"></i> ${ticket.created_at}
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i>';
-            refreshBtn.disabled = false;
-        }
-
-        // Initial Load
-        loadTickets();
-        
-        // Refresh on click
-        refreshBtn.onclick = loadTickets;
-
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>
