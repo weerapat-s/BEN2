@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ส่วนจัดการผู้ดูแล (Admin) - BEN2</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="bg-gradient"></div>
+
+    <div class="container animate-fade">
+        <nav>
+            <div class="logo">
+                <a href="index.html" style="text-decoration:none; color:inherit;"><i class="fas fa-tools"></i> BEN2 Maintenance (Admin)</a>
+            </div>
+            <div id="user-section" style="display:none;" class="user-profile">
+                <span id="user-name"></span>
+                <img id="user-avatar" class="profile-img">
+                <button id="logout-btn" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.8rem;">ออกจากระบบ</button>
+            </div>
+            <button id="auth-btn" class="btn btn-primary" style="display:none;">
+                <i class="fab fa-google"></i> เข้าสู่ระบบช่าง
+            </button>
+        </nav>
+
+        <section class="private-content" style="display:none;">
+            <header style="margin-bottom:2rem; display:flex; justify-content:space-between; align-items:center;">
+                <h1 style="color:var(--accent)"><i class="fas fa-tasks"></i> รายการแจ้งซ่อมทั้งหมด</h1>
+                <div style="font-size:0.9rem; color:var(--text-muted)">จัดการสถานะและมอบหมายงาน</div>
+            </header>
+
+            <div id="tickets-list" class="grid" style="grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));">
+                <!-- Data populated by app.js -->
+                <div class="card" style="text-align:center; color:var(--text-muted)">กำลังโหลดข้อความ...</div>
+            </div>
+        </section>
+
+        <section class="public-content" style="text-align:center; padding: 4rem 0;">
+            <i class="fas fa-user-shield" style="font-size:3rem; color:var(--accent); margin-bottom:1rem;"></i>
+            <h2>กรุณาเข้าสู่ระบบด้วยสิทธิ์ช่าง</h2>
+            <p style="color:var(--text-muted); margin-bottom:2rem;">โปรดใช้อีเมล @gmail.com ที่ได้รับอนุญาต</p>
+            <button onclick="document.getElementById('auth-btn').click()" class="btn btn-primary">เข้าสู่ระบบด้วย Google</button>
+        </section>
+
+        <footer style="text-align:center; margin-top:6rem; padding: 2rem 0; border-top: 1px solid rgba(255,255,255,0.05); color:var(--text-muted); font-size:0.8rem;">
+            © 2026 BEN2 Maintenance System | Admin Panel
+        </footer>
+    </div>
+
+    <!-- Update Status Modal -->
+    <div id="update-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center;">
+        <div class="card animate-fade" style="width:100%; max-width:500px;">
+            <h2 style="margin-bottom:1rem; color:var(--accent)"><i class="fas fa-edit"></i> อัปเดตสถานะงานซ่อม</h2>
+            <form id="update-form">
+                <input type="hidden" id="modal-ticket-id">
+                <div class="form-group">
+                    <label>เปลี่ยนสถานะเป็น:</label>
+                    <select id="modal-status" required>
+                        <option value="รอดำเนินการ">รอดำเนินการ</option>
+                        <option value="กำลังดำเนินการ">กำลังดำเนินการ</option>
+                        <option value="ซ่อมเสร็จสิ้น">ซ่อมเสร็จสิ้น</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>หมายเหตุ/รายละเอียดการซ่อม:</label>
+                    <textarea id="modal-comment" rows="3" placeholder="ระบุสิ่งที่ดำเนินการ เช่น 'เปลี่ยนสายไฟใหม่แล้ว'"></textarea>
+                </div>
+                <div style="display:flex; gap:1rem;">
+                    <button type="button" onclick="document.getElementById('update-modal').style.display='none'" class="btn btn-outline" style="flex:1">ยกเลิก</button>
+                    <button type="submit" class="btn btn-primary" style="flex:1" id="save-btn">บันทึกข้อมูล</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { updateTicketStatus } from './app.js';
+        
+        // Expose function globally for the list items
+        window.openUpdateModal = (id, status, comment) => {
+            document.getElementById('modal-ticket-id').value = id;
+            document.getElementById('modal-status').value = status;
+            document.getElementById('modal-comment').value = comment || '';
+            document.getElementById('update-modal').style.display = 'flex';
+        };
+
+        const updateForm = document.getElementById('update-form');
+        const saveBtn = document.getElementById('save-btn');
+
+        updateForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('modal-ticket-id').value;
+            const status = document.getElementById('modal-status').value;
+            const comment = document.getElementById('modal-comment').value;
+
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังบันทึก...';
+
+            const success = await updateTicketStatus(id, status, comment);
+            
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = 'บันทึกข้อมูล';
+
+            if (success) {
+                document.getElementById('update-modal').style.display = 'none';
+            } else {
+                alert('ไม่สามารถอัปเดตสถานะได้');
+            }
+        };
+
+        // Redefine render function for Admin (to include "Update" button)
+        // This is a bit of a shortcut to keep it all in one script, but better for a single file experience
+        import { onSnapshot, collection, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { db } from './firebase-config.js';
+
+        const list = document.getElementById('tickets-list');
+        const q = query(collection(db, 'maintenance_tickets'), orderBy('created_at', 'desc'));
+        
+        onSnapshot(q, (snapshot) => {
+            const tickets = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            
+            if (tickets.length === 0) {
+                list.innerHTML = `<div class="card" style="grid-column:1/-1; text-align:center; color:var(--text-muted)">ยังไม่มีรายการแจ้งซ่อม</div>`;
+                return;
+            }
+
+            list.innerHTML = tickets.map(ticket => `
+                <div class="card animate-fade">
+                    <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:1rem;">
+                        <div>
+                            <h3 style="color:var(--accent)">${ticket.equipment_type}</h3>
+                            <p style="font-size:0.875rem; color:var(--text-muted)">${ticket.location}</p>
+                        </div>
+                        <span class="badge ${getStatusClass(ticket.status)}">${ticket.status}</span>
+                    </div>
+                    <p style="margin-bottom:1rem; font-size:0.95rem">${ticket.issue_detail}</p>
+                    ${ticket.image_url ? `<img src="${ticket.image_url}" style="width:100%; height:200px; object-fit:cover; border-radius:0.5rem; margin-bottom:1rem;">` : ''}
+                    
+                    <div style="font-size:0.8rem; color:var(--text-muted); border-top:1px solid rgba(255,255,255,0.1); padding-top:1rem; margin-bottom:1rem;">
+                        <i class="fas fa-user-edit"></i> ผู้แจ้ง: ${ticket.reporter_name}<br>
+                        <i class="fas fa-clock"></i> เวลา: ${ticket.created_at?.toDate().toLocaleString() || 'กำลังส่ง...'}
+                    </div>
+
+                    ${ticket.technician_comment ? `
+                        <div style="background:rgba(212,175,55,0.05); padding:1rem; border-radius:0.5rem; border:1px solid rgba(212,175,55,0.2); margin-bottom:1rem;">
+                            <small style="color:var(--accent); font-weight:700">บันทึกช่าง:</small>
+                            <p style="font-size:0.875rem">${ticket.technician_comment}</p>
+                        </div>
+                    ` : ''}
+
+                    <button class="btn btn-outline" style="width:100%" onclick="window.openUpdateModal('${ticket.id}', '${ticket.status}', '${ticket.technician_comment || ''}')">
+                        <i class="fas fa-edit"></i> จัดการรายการ
+                    </button>
+                </div>
+            `).join('');
+        });
+
+        const getStatusClass = (status) => {
+            switch (status) {
+                case 'รอดำเนินการ': return 'status-pending';
+                case 'กำลังดำเนินการ': return 'status-progress';
+                case 'ซ่อมเสร็จสิ้น': return 'status-done';
+                default: return '';
+            }
+        };
+
+    </script>
+    <script type="module" src="app.js"></script>
+</body>
+</html>
