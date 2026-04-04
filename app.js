@@ -34,7 +34,7 @@ export async function submitTicket(ticketData, imageFile) {
             headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify(payload)
         });
-        
+
         const result = await response.json();
         return result.status === "success";
     } catch (error) {
@@ -48,10 +48,10 @@ export async function fetchTickets() {
     try {
         const response = await fetch(SCRIPT_URL);
         const data = await response.json();
-        
+
         if (data.status === "success") {
             // ระบบ Google Sheets คืนค่าเป็น Array Objects
-            return data.data; 
+            return data.data;
         } else {
             console.error("Error API:", data.message);
             return [];
@@ -71,13 +71,13 @@ export async function updateTicketStatus(id, status, comment) {
             status: status,
             comment: comment || ''
         };
-        
+
         const response = await fetch(SCRIPT_URL, {
             method: "POST",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify(payload)
         });
-        
+
         const result = await response.json();
         return result.status === "success";
     } catch (error) {
