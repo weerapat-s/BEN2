@@ -55,6 +55,13 @@
 </head>
 
 <body>
+    <!-- Intro Screen -->
+    <div id="introScreen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; background: var(--bg-dark); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.8s ease, visibility 0.8s ease;">
+        <i class="fas fa-desktop" style="font-size: 5rem; color: var(--accent); margin-bottom: 1.5rem; animation: pulse 1.5s infinite;"></i>
+        <h1 style="color: #fff; letter-spacing: 2px; font-weight: 700; margin-bottom: 0.5rem; text-align: center;">BEN2 Maintenance</h1>
+        <p style="color: var(--accent); font-size: 1.1rem; text-align: center;">ระบบแจ้งซ่อมอุปกรณ์สื่อออนไลน์</p>
+    </div>
+
     <div class="bg-gradient"></div>
 
     <div class="container animate-fade">
@@ -164,6 +171,19 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script src="app.js"></script>
+
+    <!-- Intro Script -->
+    <script>
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const intro = document.getElementById('introScreen');
+                if (intro) {
+                    intro.style.opacity = '0';
+                    intro.style.visibility = 'hidden';
+                }
+            }, 1200); // แสดง 1.2 วินาทีแล้วค่อยๆ หายไป
+        });
+    </script>
 </body>
 
 </html>
