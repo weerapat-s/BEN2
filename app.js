@@ -22,18 +22,36 @@ if (window.location.pathname.includes('admin.html')) {
 const repairForm = document.getElementById('repairForm');
 if (repairForm) {
     repairForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
+        e.preventDefault(); // บังคับไม่ให้เว็บโหลดหน้าใหม่ (สำคัญมาก)
+
         const submitBtn = document.getElementById('submitBtn');
         const originalBtnText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังส่งข้อมูล...';
+
+        // ขึ้น Popup กำลังโหลด...
+        Swal.fire({
+            title: 'กำลังส่งข้อมูล...',
+            text: 'กรุณารอสักครู่ ระบบกำลังบันทึกใบแจ้งซ่อม',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
+        });
+
         submitBtn.disabled = true;
 
         const fileInput = document.getElementById('imageFile');
         let base64Image = null;
-        if (fileInput.files.length > 0) base64Image = await getBase64(fileInput.files[0]);
+
+        if (fileInput.files.length > 0) {
+            try {
+                base64Image = await getBase64(fileInput.files[0]);
+            } catch (error) {
+                Swal.fire('ข้อผิดพลาด!', 'ไม่สามารถอ่านไฟล์รูปภาพได้', 'error');
+                submitBtn.disabled = false;
+                return;
+            }
+        }
 
         const payload = {
-            action: "create", // บอกสคริปต์ว่านี่คือการสร้างใหม่
+            action: "create",
             ticket_id: 'BEN2-' + Math.floor(Math.random() * 10000),
             reporter_name: document.getElementById('reporterName').value,
             equipment_type: document.getElementById('equipmentType').value,
@@ -43,18 +61,42 @@ if (repairForm) {
         };
 
         try {
-            const response = await fetch(SCRIPT_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) });
+            console.log("กำลังส่งข้อมูลไปที่:", SCRIPT_URL); // ลองเช็คใน Console
+
+            const response = await fetch(SCRIPT_URL, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify(payload)
+            });
+
             const result = await response.json();
+            console.log("ผลลัพธ์จากเซิร์ฟเวอร์:", result);
+
             if (result.status === "success") {
-                alert("ส่งใบแจ้งซ่อมเรียบร้อยแล้ว!");
-                repairForm.reset();
-                window.location.href = "dashboard.html";
-            } else alert("Error: " + result.message);
-        } catch (error) { alert("ติดต่อเซิร์ฟเวอร์ไม่ได้"); }
-        finally { submitBtn.innerHTML = originalBtnText; submitBtn.disabled = false; }
+                // Popup แจ้งเตือนว่าสำเร็จ!
+                Swal.fire({
+                    icon: 'success',
+                    title: 'ส่งแจ้งเรียบร้อยแล้ว!',
+                    text: 'รหัสแจ้งซ่อมของคุณคือ: ' + payload.ticket_id,
+                    confirmButtonText: 'ตกลง',
+                    confirmButtonColor: '#1dd1a1'
+                }).then(() => {
+                    repairForm.reset();
+                    // พาผู้ใช้ไปหน้า Dashboard ทันที
+                    window.location.href = "dashboard.html";
+                });
+            } else {
+                Swal.fire('เกิดข้อผิดพลาด!', result.message, 'error');
+            }
+        } catch (error) {
+            console.error(error);
+            Swal.fire('เชื่อมต่อไม่ได้!', 'กรุณาตรวจสอบอินเทอร์เน็ตหรือ URL ของ Apps Script', 'error');
+        } finally {
+            submitBtn.innerHTML = originalBtnText;
+            submitBtn.disabled = false;
+        }
     });
 }
-
 // --- 2. หน้าติดตามสถานะ (dashboard.html) ---
 async function loadDashboard() {
     const tableBody = document.getElementById('ticketTableBody');
