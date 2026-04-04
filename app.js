@@ -29,8 +29,10 @@ const loginForm = document.getElementById('loginForm');
 if (loginForm) {
     loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
+        const username = document.getElementById('adminUsername').value;
         const password = document.getElementById('adminPassword').value;
-        if (password === "1234") {
+        
+        if (username === "Newlnwza007" && password === "admin123") {
             sessionStorage.setItem("adminLoggedIn", "true");
             Swal.fire({
                 icon: 'success',
@@ -41,7 +43,7 @@ if (loginForm) {
                 window.location.href = "admin.html";
             });
         } else {
-            Swal.fire('รหัสผ่านไม่ถูกต้อง', 'กรุณาลองใหม่อีกครั้ง', 'error');
+            Swal.fire('ข้อมูลไม่ถูกต้อง', 'ชื่อผู้ใช้งานหรือรหัสผ่านผิด กรุณาลองใหม่อีกครั้ง', 'error');
             document.getElementById('adminPassword').value = '';
         }
     });
