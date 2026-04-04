@@ -1,244 +1,81 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ส่วนจัดการผู้ดูแล (Admin) - BEN2</title>
+    <title>ระบบจัดการของช่าง - BEN2</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
-    <div class="bg-gradient"></div>
-
-    <div class="container animate-fade">
-        <nav>
-            <div class="logo">
-                <a href="index.html" style="text-decoration:none; color:inherit;"><i class="fas fa-tools"></i> BEN2 Maintenance (Admin)</a>
-            </div>
-            <div style="flex:1"></div>
-            <button id="logout-btn" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.8rem; display:none;">ออกจากระบบ</button>
-        </nav>
-
-        <section class="private-content" id="private-section" style="display:none;">
-            <header style="margin-bottom:2rem; display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                    <h1 style="color:var(--accent)"><i class="fas fa-tasks"></i> รายการแจ้งซ่อมทั้งหมด</h1>
-                    <div style="font-size:0.9rem; color:var(--text-muted)">เบญจมราชรังสฤษฎิ์ ๒ (จัดการผ่านระบบ Google Sheets)</div>
-                </div>
-                <button id="refresh-btn" class="btn btn-primary"><i class="fas fa-sync-alt"></i> โหลดข้อมูลล่าสุด</button>
-            </header>
-
-            <div id="tickets-list" class="grid" style="grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1rem;">
-                <!-- Data populated by script -->
-                <div class="card" style="grid-column: 1/-1; text-align:center; color:var(--text-muted)">คลิกปุ่ม "โหลดข้อมูลล่าสุด" เพื่อดูรายการ...</div>
-            </div>
-        </section>
-
-        <section class="public-content" id="public-section" style="text-align:center; padding: 4rem 0;">
-            <i class="fas fa-user-shield" style="font-size:3rem; color:var(--accent); margin-bottom:1rem;"></i>
-            <h2>ระบบจัดการสำหรับแอดมิน</h2>
-            <p style="color:var(--text-muted); margin-bottom:2rem;">กรุณายืนยันตัวตนเพื่อเข้าสู่ระบบควบคุม</p>
-            <form id="login-form" style="max-width: 300px; margin: 0 auto;">
-                <input type="text" id="admin-user" placeholder="ชื่อผู้ใช้ (Username)" style="width:100%; padding: 0.8rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: #fff; margin-bottom: 1rem;" required>
-                <input type="password" id="admin-pwd" placeholder="รหัสผ่าน (Password)" style="width:100%; padding: 0.8rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: #fff; margin-bottom: 1rem;" required>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">เข้าสู่ระบบ</button>
-            </form>
-            <div id="login-error" style="color: #ff6b6b; margin-top: 1rem; display: none;">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!</div>
-        </section>
-
-        <footer style="text-align:center; margin-top:6rem; padding: 2rem 0; border-top: 1px solid rgba(255,255,255,0.05); color:var(--text-muted); font-size:0.8rem;">
-            © 2026 BEN2 Maintenance System | Admin Panel
-        </footer>
-    </div>
-
-    <!-- Update Status Modal -->
-    <div id="update-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center;">
-        <div class="card animate-fade" style="width:100%; max-width:500px;">
-            <h2 style="margin-bottom:1rem; color:var(--accent)"><i class="fas fa-edit"></i> อัปเดตสถานะงานซ่อม</h2>
-            <form id="update-form">
-                <input type="hidden" id="modal-ticket-id">
-                <div class="form-group" style="margin-bottom: 1rem;">
-                    <label style="display:block; margin-bottom:0.5rem; color:var(--text-muted);">เปลี่ยนสถานะเป็น:</label>
-                    <select id="modal-status" required style="width:100%; padding: 0.8rem; border-radius: 8px; background: #1a1a2e; color: #fff; border: 1px solid rgba(255,255,255,0.2);">
-                        <option value="รอดำเนินการ">รอดำเนินการ</option>
-                        <option value="กำลังดำเนินการ">กำลังดำเนินการ</option>
-                        <option value="ซ่อมเสร็จสิ้น">ซ่อมเสร็จสิ้น</option>
-                    </select>
-                </div>
-                <div class="form-group" style="margin-bottom: 1rem;">
-                    <label style="display:block; margin-bottom:0.5rem; color:var(--text-muted);">หมายเหตุ/รายละเอียดการซ่อม:</label>
-                    <textarea id="modal-comment" rows="3" placeholder="ระบุสิ่งที่ดำเนินการ เช่น 'เปลี่ยนสายไฟใหม่แล้ว'" style="width:100%; padding: 0.8rem; border-radius: 8px; background: rgba(0,0,0,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.2);"></textarea>
-                </div>
-                <div style="display:flex; gap:1rem;">
-                    <button type="button" onclick="document.getElementById('update-modal').style.display='none'" class="btn btn-outline" style="flex:1">ยกเลิก</button>
-                    <button type="submit" class="btn btn-primary" style="flex:1" id="save-btn">บันทึกข้อมูล</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        // URL ของ Google Apps Script (เหมือนกับในหน้า app.js)
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzgm-hwW_uccWNHkz9y850ACF0pdDlp-NV8LW7gmxWMMvBBS2zLzl4VWbbiE9UVU68frw/exec";
-
-        // Logic เข้าสู่ระบบ
-        const loginForm = document.getElementById('login-form');
-        const loginError = document.getElementById('login-error');
-        const publicSec = document.getElementById('public-section');
-        const privateSec = document.getElementById('private-section');
-        const logoutBtn = document.getElementById('logout-btn');
-
-        loginForm.onsubmit = (e) => {
-            e.preventDefault();
-            const user = document.getElementById('admin-user').value;
-            const pwd = document.getElementById('admin-pwd').value;
-            
-            // กำหนดสิทธิ์การเข้าถึงตามที่ระบุ
-            if (user === "Newlnwza007" && pwd === "admin123") {
-                publicSec.style.display = 'none';
-                privateSec.style.display = 'block';
-                logoutBtn.style.display = 'block';
-                loginError.style.display = 'none';
-                loadAdminTickets();
-            } else {
-                loginError.style.display = 'block';
-            }
-        };
-
-        logoutBtn.onclick = () => {
-            document.getElementById('admin-user').value = "";
-            document.getElementById('admin-pwd').value = "";
-            publicSec.style.display = 'block';
-            privateSec.style.display = 'none';
-            logoutBtn.style.display = 'none';
-            loginError.style.display = 'none';
-        };
-
-        // ฟังก์ชันช่วยในการเปิด Modal เพื่ออัปเดตงาน
-        window.openUpdateModal = (id, status, comment) => {
-            document.getElementById('modal-ticket-id').value = id;
-            document.getElementById('modal-status').value = status;
-            document.getElementById('modal-comment').value = (comment !== 'null' && comment !== 'undefined' && comment !== '-') ? comment : '';
-            document.getElementById('update-modal').style.display = 'flex';
-        };
-
-        const updateForm = document.getElementById('update-form');
-        const saveBtn = document.getElementById('save-btn');
-        const listContainer = document.getElementById('tickets-list');
-        const refreshBtn = document.getElementById('refresh-btn');
-
-        updateForm.onsubmit = async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('modal-ticket-id').value;
-            const status = document.getElementById('modal-status').value;
-            const comment = document.getElementById('modal-comment').value;
-
-            saveBtn.disabled = true;
-            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังบันทึก...';
-
-            try {
-                // ส่งข้อมูลอัปเดตไปยังระบบ
-                const payload = {
-                    action: "update",
-                    ticket_id: id,
-                    status: status,
-                    comment: comment || '-'
-                };
-                
-                const response = await fetch(SCRIPT_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify(payload)
-                });
-                
-                const result = await response.json();
-                if (result.status === "success") {
-                    document.getElementById('update-modal').style.display = 'none';
-                    alert("บันทึกสถานะสำเร็จ!");
-                    loadAdminTickets();
-                } else {
-                    alert('เกิดข้อผิดพลาดในการอัปเดต: ' + result.message);
-                }
-            } catch (error) {
-                console.error("Error updating ticket:", error);
-                alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
-            } finally {
-                saveBtn.disabled = false;
-                saveBtn.innerHTML = 'บันทึกข้อมูล';
-            }
-        };
-
-        // ดึงรายการงานช่างทั้งหมด
-        async function loadAdminTickets() {
-            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังโหลด...';
-            refreshBtn.disabled = true;
-            listContainer.innerHTML = `<div class="card" style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding: 3rem;"><i class="fas fa-circle-notch fa-spin fa-2x"></i><br><br>กำลังดึงข้อมูล...</div>`;
-            
-            try {
-                const response = await fetch(SCRIPT_URL);
-                const dataObj = await response.json();
-                
-                let tickets = [];
-                // รองรับ format ใหม่ (dataObj.data) และ format เก่า
-                if (dataObj.status === "success" && Array.isArray(dataObj.data)) {
-                    tickets = dataObj.data;
-                } else if (Array.isArray(dataObj)) {
-                    tickets = dataObj;
-                }
-                
-                if (tickets.length === 0) {
-                    listContainer.innerHTML = `<div class="card" style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding: 3rem;">ยังไม่มีรายการแจ้งซ่อม หรือไม่สามารถเชื่อมต่อฐานข้อมูลได้</div>`;
-                } else {
-                    const reversed = [...tickets].reverse(); // เอาตัวใหม่ล่าสุดขึ้นก่อน
-                    listContainer.innerHTML = reversed.map(ticket => `
-                        <div class="card animate-fade">
-                            <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:1rem;">
-                                <div>
-                                    <h3 style="color:var(--accent); margin:0;">${ticket.equipment_type || 'ไม่มีชื่ออุปกรณ์'}</h3>
-                                    <p style="font-size:0.875rem; color:var(--text-muted); margin:0;">${ticket.location || '-'}</p>
-                                </div>
-                                <span class="badge ${getStatusClass(ticket.status)}" style="white-space: nowrap;">${ticket.status || 'รอดำเนินการ'}</span>
-                            </div>
-                            <p style="margin-bottom:1rem; font-size:0.95rem">${ticket.issue_detail || 'ไม่มีรายละเอียด'}</p>
-                            ${ticket.image_url && ticket.image_url !== '-' ? `<img src="${ticket.image_url}" style="width:100%; height:200px; object-fit:cover; border-radius:0.5rem; margin-bottom:1rem;" onerror="this.style.display='none'">` : ''}
-                            
-                            <div style="font-size:0.8rem; color:var(--text-muted); border-top:1px solid rgba(255,255,255,0.1); padding-top:1rem; margin-bottom:1rem; line-height: 1.5;">
-                                <i class="fas fa-id-badge"></i> รหัสงาน: <span style="color: #fff;">${ticket.ticket_id}</span><br>
-                                <i class="fas fa-user-edit"></i> ผู้แจ้ง: <span style="color: #fff;">${ticket.reporter_name}</span><br>
-                                <i class="fas fa-clock"></i> เวลา: ${ticket.created_at || ticket.timestamp || 'ไม่ระบุเวลา'}
-                            </div>
-
-                            ${ticket.technician_comment && ticket.technician_comment !== '-' ? `
-                                <div style="background:rgba(212,175,55,0.05); padding:1rem; border-radius:0.5rem; border:1px solid rgba(212,175,55,0.2); margin-bottom:1rem;">
-                                    <small style="color:var(--accent); font-weight:700">บันทึกช่าง:</small>
-                                    <p style="font-size:0.875rem; margin:0; color:#fff;">${ticket.technician_comment}</p>
-                                </div>
-                            ` : ''}
-
-                            <button class="btn btn-outline" style="width:100%" onclick="window.openUpdateModal('${ticket.ticket_id}', '${ticket.status}', '${ticket.technician_comment || ''}')">
-                                <i class="fas fa-edit"></i> เปลี่ยนสถานะการซ่อม
-                            </button>
-                        </div>
-                    `).join('');
-                }
-            } catch (err) {
-                console.error(err);
-                listContainer.innerHTML = `<div class="card" style="grid-column:1/-1; text-align:center; color:#ff6b6b; padding: 3rem;">เกิดข้อผิดพลาดในการดึงข้อมูล โปรดตรวจสอบการตั้งค่า Deploy ของคุณ</div>`;
-            }
-            
-            refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> โหลดข้อมูลล่าสุด';
-            refreshBtn.disabled = false;
+    <style>
+        .table-container {
+            overflow-x: auto;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 10px;
         }
 
-        const getStatusClass = (status) => {
-            if (status === 'รอดำเนินการ') return 'status-pending';
-            if (status === 'กำลังดำเนินการ') return 'status-progress';
-            if (status === 'ซ่อมเสร็จสิ้น') return 'status-done';
-            return '';
-        };
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #fff;
+            text-align: left;
+        }
 
-        refreshBtn.onclick = loadAdminTickets;
+        th {
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--accent, #FFD700);
+        }
 
-    </script>
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        select,
+        input[type="text"] {
+            width: 100%;
+            padding: 0.5rem;
+            border-radius: 5px;
+            border: none;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-gradient"></div>
+    <div class="container animate-fade" style="max-width: 1000px;">
+        <nav style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0;">
+            <div class="logo"><i class="fas fa-tools" style="color: #FFD700;"></i> โหมดช่างซ่อม (Admin)</div>
+            <a href="index.html" class="btn btn-outline" style="text-decoration: none;"><i
+                    class="fas fa-sign-out-alt"></i> ออกจากระบบ</a>
+        </nav>
+        <header style="padding: 2rem 0 1rem 0;">
+            <h2><i class="fas fa-tasks"></i> จัดการรายการแจ้งซ่อม</h2>
+        </header>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>รหัสซ่อม / ผู้แจ้ง</th>
+                        <th>อาการ / สถานที่</th>
+                        <th>ปรับสถานะ</th>
+                        <th>ข้อความถึงผู้แจ้ง (ระบุเหตุผล/นัดหมาย)</th>
+                        <th>บันทึก</th>
+                    </tr>
+                </thead>
+                <tbody id="adminTableBody">
+                    <tr>
+                        <td colspan="5" style="text-align:center;">กำลังโหลดข้อมูล...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="app.js"></script>
 </body>
+
 </html>
