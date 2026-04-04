@@ -2,16 +2,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-    --primary: #1a365d; /* BEN2 Deep Blue */
-    --accent: #d4af37;  /* BEN2 Gold */
-    --bg-dark: #0f172a; /* Slate 900 */
-    --bg-card: #1e293b; /* Slate 800 */
+    --primary: #0033a0; /* Royal Blue */
+    --accent: #FFD700;  /* Bright Yellow / Gold */
+    --bg-dark: #001845; /* Very Dark Blue */
+    --bg-card: #002868; /* Card Dark Blue */
     --text-main: #f8fafc;
     --text-muted: #94a3b8;
-    --success: #10b981;
-    --warning: #f59e0b;
-    --error: #ef4444;
-    --glass: rgba(30, 41, 59, 0.7);
+    --success: #1dd1a1;
+    --warning: #feca57;
+    --error: #ff6b6b;
+    --glass: rgba(0, 40, 104, 0.7);
 }
 
 * {
@@ -36,8 +36,8 @@ body {
     width: 100%;
     height: 100%;
     z-index: -1;
-    background: radial-gradient(circle at 20% 30%, rgba(26, 54, 93, 0.4) 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, rgba(212, 175, 55, 0.1) 0%, transparent 50%);
+    background: radial-gradient(circle at 20% 30%, rgba(0, 51, 160, 0.6) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255, 215, 0, 0.15) 0%, transparent 50%);
 }
 
 .container {
