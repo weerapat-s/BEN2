@@ -28,21 +28,22 @@
                 <button id="refresh-btn" class="btn btn-primary"><i class="fas fa-sync-alt"></i> โหลดข้อมูลล่าสุด</button>
             </header>
 
-            <div id="tickets-list" class="grid" style="grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));">
-                <!-- Data populated by app.js -->
-                <div class="card" style="text-align:center; color:var(--text-muted)">คลิกปุ่ม "โหลดข้อมูลล่าสุด" เพื่อดูรายการ...</div>
+            <div id="tickets-list" class="grid" style="grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1rem;">
+                <!-- Data populated by script -->
+                <div class="card" style="grid-column: 1/-1; text-align:center; color:var(--text-muted)">คลิกปุ่ม "โหลดข้อมูลล่าสุด" เพื่อดูรายการ...</div>
             </div>
         </section>
 
         <section class="public-content" id="public-section" style="text-align:center; padding: 4rem 0;">
             <i class="fas fa-user-shield" style="font-size:3rem; color:var(--accent); margin-bottom:1rem;"></i>
-            <h2>ระบบจัดการสำหรับช่าง</h2>
-            <p style="color:var(--text-muted); margin-bottom:2rem;">เนื่องจากเปลี่ยนเป็นระบบ Google Sheets กรุณายืนยันตัวตน</p>
+            <h2>ระบบจัดการสำหรับแอดมิน</h2>
+            <p style="color:var(--text-muted); margin-bottom:2rem;">กรุณายืนยันตัวตนเพื่อเข้าสู่ระบบควบคุม</p>
             <form id="login-form" style="max-width: 300px; margin: 0 auto;">
-                <input type="password" id="admin-pwd" placeholder="รหัสผ่านช่าง (ทดลองใส่ admin)" style="width:100%; padding: 0.8rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: #fff; margin-bottom: 1rem;" required>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">เข้าสู่ระบบช่าง</button>
+                <input type="text" id="admin-user" placeholder="ชื่อผู้ใช้ (Username)" style="width:100%; padding: 0.8rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: #fff; margin-bottom: 1rem;" required>
+                <input type="password" id="admin-pwd" placeholder="รหัสผ่าน (Password)" style="width:100%; padding: 0.8rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: #fff; margin-bottom: 1rem;" required>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">เข้าสู่ระบบ</button>
             </form>
-            <div id="login-error" style="color: red; margin-top: 1rem; display: none;">รหัสผ่านไม่ถูกต้อง!</div>
+            <div id="login-error" style="color: #ff6b6b; margin-top: 1rem; display: none;">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!</div>
         </section>
 
         <footer style="text-align:center; margin-top:6rem; padding: 2rem 0; border-top: 1px solid rgba(255,255,255,0.05); color:var(--text-muted); font-size:0.8rem;">
@@ -76,10 +77,11 @@
         </div>
     </div>
 
-    <script type="module">
-        import { fetchTickets, updateTicketStatus } from './app.js';
-        
-        // Simple Login Display Logic
+    <script>
+        // URL ของ Google Apps Script (เหมือนกับในหน้า app.js)
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzgm-hwW_uccWNHkz9y850ACF0pdDlp-NV8LW7gmxWMMvBBS2zLzl4VWbbiE9UVU68frw/exec";
+
+        // Logic เข้าสู่ระบบ
         const loginForm = document.getElementById('login-form');
         const loginError = document.getElementById('login-error');
         const publicSec = document.getElementById('public-section');
@@ -88,11 +90,15 @@
 
         loginForm.onsubmit = (e) => {
             e.preventDefault();
+            const user = document.getElementById('admin-user').value;
             const pwd = document.getElementById('admin-pwd').value;
-            if (pwd === "admin") {
+            
+            // กำหนดสิทธิ์การเข้าถึงตามที่ระบุ
+            if (user === "Newlnwza007" && pwd === "admin123") {
                 publicSec.style.display = 'none';
                 privateSec.style.display = 'block';
                 logoutBtn.style.display = 'block';
+                loginError.style.display = 'none';
                 loadAdminTickets();
             } else {
                 loginError.style.display = 'block';
@@ -100,6 +106,7 @@
         };
 
         logoutBtn.onclick = () => {
+            document.getElementById('admin-user').value = "";
             document.getElementById('admin-pwd').value = "";
             publicSec.style.display = 'block';
             privateSec.style.display = 'none';
@@ -107,17 +114,17 @@
             loginError.style.display = 'none';
         };
 
-        // Expose function globally for the list items
+        // ฟังก์ชันช่วยในการเปิด Modal เพื่ออัปเดตงาน
         window.openUpdateModal = (id, status, comment) => {
             document.getElementById('modal-ticket-id').value = id;
             document.getElementById('modal-status').value = status;
-            document.getElementById('modal-comment').value = comment !== 'null' && comment !== 'undefined' ? comment : '';
+            document.getElementById('modal-comment').value = (comment !== 'null' && comment !== 'undefined' && comment !== '-') ? comment : '';
             document.getElementById('update-modal').style.display = 'flex';
         };
 
         const updateForm = document.getElementById('update-form');
         const saveBtn = document.getElementById('save-btn');
-        const list = document.getElementById('tickets-list');
+        const listContainer = document.getElementById('tickets-list');
         const refreshBtn = document.getElementById('refresh-btn');
 
         updateForm.onsubmit = async (e) => {
@@ -129,61 +136,94 @@
             saveBtn.disabled = true;
             saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังบันทึก...';
 
-            const success = await updateTicketStatus(id, status, comment);
-            
-            saveBtn.disabled = false;
-            saveBtn.innerHTML = 'บันทึกข้อมูล';
-
-            if (success) {
-                document.getElementById('update-modal').style.display = 'none';
-                loadAdminTickets(); // reload list
-            } else {
-                alert('ไม่สามารถอัปเดตสถานะได้ (โปรดตรวจสอบเงื่อนไข Deploy-Anyone)');
+            try {
+                // ส่งข้อมูลอัปเดตไปยังระบบ
+                const payload = {
+                    action: "update",
+                    ticket_id: id,
+                    status: status,
+                    comment: comment || '-'
+                };
+                
+                const response = await fetch(SCRIPT_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                if (result.status === "success") {
+                    document.getElementById('update-modal').style.display = 'none';
+                    alert("บันทึกสถานะสำเร็จ!");
+                    loadAdminTickets();
+                } else {
+                    alert('เกิดข้อผิดพลาดในการอัปเดต: ' + result.message);
+                }
+            } catch (error) {
+                console.error("Error updating ticket:", error);
+                alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = 'บันทึกข้อมูล';
             }
         };
 
-        // Load Tickets
+        // ดึงรายการงานช่างทั้งหมด
         async function loadAdminTickets() {
             refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังโหลด...';
             refreshBtn.disabled = true;
-            list.innerHTML = `<div class="card" style="grid-column:1/-1; text-align:center; color:var(--text-muted)"><i class="fas fa-circle-notch fa-spin"></i> รอสักครู่...</div>`;
+            listContainer.innerHTML = `<div class="card" style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding: 3rem;"><i class="fas fa-circle-notch fa-spin fa-2x"></i><br><br>กำลังดึงข้อมูล...</div>`;
             
-            const tickets = await fetchTickets();
-            
-            if (tickets.length === 0) {
-                list.innerHTML = `<div class="card" style="grid-column:1/-1; text-align:center; color:var(--text-muted)">ยังไม่มีรายการแจ้งซ่อม ຫຼືเชื่อมต่อไม่ระบุ</div>`;
-            } else {
-                const reversed = [...tickets].reverse();
-                list.innerHTML = reversed.map(ticket => `
-                    <div class="card animate-fade">
-                        <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:1rem;">
-                            <div>
-                                <h3 style="color:var(--accent); margin:0;">${ticket.equipment_type}</h3>
-                                <p style="font-size:0.875rem; color:var(--text-muted); margin:0;">${ticket.location}</p>
+            try {
+                const response = await fetch(SCRIPT_URL);
+                const dataObj = await response.json();
+                
+                let tickets = [];
+                // รองรับ format ใหม่ (dataObj.data) และ format เก่า
+                if (dataObj.status === "success" && Array.isArray(dataObj.data)) {
+                    tickets = dataObj.data;
+                } else if (Array.isArray(dataObj)) {
+                    tickets = dataObj;
+                }
+                
+                if (tickets.length === 0) {
+                    listContainer.innerHTML = `<div class="card" style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding: 3rem;">ยังไม่มีรายการแจ้งซ่อม หรือไม่สามารถเชื่อมต่อฐานข้อมูลได้</div>`;
+                } else {
+                    const reversed = [...tickets].reverse(); // เอาตัวใหม่ล่าสุดขึ้นก่อน
+                    listContainer.innerHTML = reversed.map(ticket => `
+                        <div class="card animate-fade">
+                            <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:1rem;">
+                                <div>
+                                    <h3 style="color:var(--accent); margin:0;">${ticket.equipment_type || 'ไม่มีชื่ออุปกรณ์'}</h3>
+                                    <p style="font-size:0.875rem; color:var(--text-muted); margin:0;">${ticket.location || '-'}</p>
+                                </div>
+                                <span class="badge ${getStatusClass(ticket.status)}" style="white-space: nowrap;">${ticket.status || 'รอดำเนินการ'}</span>
                             </div>
-                            <span class="badge ${getStatusClass(ticket.status)}">${ticket.status}</span>
-                        </div>
-                        <p style="margin-bottom:1rem; font-size:0.95rem">${ticket.issue_detail}</p>
-                        ${ticket.image_url && ticket.image_url !== '-' ? `<img src="${ticket.image_url}" style="width:100%; height:200px; object-fit:cover; border-radius:0.5rem; margin-bottom:1rem;">` : ''}
-                        
-                        <div style="font-size:0.8rem; color:var(--text-muted); border-top:1px solid rgba(255,255,255,0.1); padding-top:1rem; margin-bottom:1rem;">
-                            <i class="fas fa-id-badge"></i> รหัสงาน: ${ticket.ticket_id}<br>
-                            <i class="fas fa-user-edit"></i> ผู้แจ้ง: ${ticket.reporter_name}<br>
-                            <i class="fas fa-clock"></i> เวลา: ${ticket.created_at}
-                        </div>
-
-                        ${ticket.technician_comment ? `
-                            <div style="background:rgba(212,175,55,0.05); padding:1rem; border-radius:0.5rem; border:1px solid rgba(212,175,55,0.2); margin-bottom:1rem;">
-                                <small style="color:var(--accent); font-weight:700">บันทึกช่าง:</small>
-                                <p style="font-size:0.875rem; margin:0;">${ticket.technician_comment}</p>
+                            <p style="margin-bottom:1rem; font-size:0.95rem">${ticket.issue_detail || 'ไม่มีรายละเอียด'}</p>
+                            ${ticket.image_url && ticket.image_url !== '-' ? `<img src="${ticket.image_url}" style="width:100%; height:200px; object-fit:cover; border-radius:0.5rem; margin-bottom:1rem;" onerror="this.style.display='none'">` : ''}
+                            
+                            <div style="font-size:0.8rem; color:var(--text-muted); border-top:1px solid rgba(255,255,255,0.1); padding-top:1rem; margin-bottom:1rem; line-height: 1.5;">
+                                <i class="fas fa-id-badge"></i> รหัสงาน: <span style="color: #fff;">${ticket.ticket_id}</span><br>
+                                <i class="fas fa-user-edit"></i> ผู้แจ้ง: <span style="color: #fff;">${ticket.reporter_name}</span><br>
+                                <i class="fas fa-clock"></i> เวลา: ${ticket.created_at || ticket.timestamp || 'ไม่ระบุเวลา'}
                             </div>
-                        ` : ''}
 
-                        <button class="btn btn-outline" style="width:100%" onclick="window.openUpdateModal('${ticket.ticket_id}', '${ticket.status}', '${ticket.technician_comment || ''}')">
-                            <i class="fas fa-edit"></i> เปลี่ยนสถานะ
-                        </button>
-                    </div>
-                `).join('');
+                            ${ticket.technician_comment && ticket.technician_comment !== '-' ? `
+                                <div style="background:rgba(212,175,55,0.05); padding:1rem; border-radius:0.5rem; border:1px solid rgba(212,175,55,0.2); margin-bottom:1rem;">
+                                    <small style="color:var(--accent); font-weight:700">บันทึกช่าง:</small>
+                                    <p style="font-size:0.875rem; margin:0; color:#fff;">${ticket.technician_comment}</p>
+                                </div>
+                            ` : ''}
+
+                            <button class="btn btn-outline" style="width:100%" onclick="window.openUpdateModal('${ticket.ticket_id}', '${ticket.status}', '${ticket.technician_comment || ''}')">
+                                <i class="fas fa-edit"></i> เปลี่ยนสถานะการซ่อม
+                            </button>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error(err);
+                listContainer.innerHTML = `<div class="card" style="grid-column:1/-1; text-align:center; color:#ff6b6b; padding: 3rem;">เกิดข้อผิดพลาดในการดึงข้อมูล โปรดตรวจสอบการตั้งค่า Deploy ของคุณ</div>`;
             }
             
             refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> โหลดข้อมูลล่าสุด';
@@ -191,12 +231,10 @@
         }
 
         const getStatusClass = (status) => {
-            switch (status) {
-                case 'รอดำเนินการ': return 'status-pending';
-                case 'กำลังดำเนินการ': return 'status-progress';
-                case 'ซ่อมเสร็จสิ้น': return 'status-done';
-                default: return '';
-            }
+            if (status === 'รอดำเนินการ') return 'status-pending';
+            if (status === 'กำลังดำเนินการ') return 'status-progress';
+            if (status === 'ซ่อมเสร็จสิ้น') return 'status-done';
+            return '';
         };
 
         refreshBtn.onclick = loadAdminTickets;
