@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เข้าสู่ระบบผู้ดูแล - BEN2</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .login-container {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-card {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .login-icon {
+            font-size: 3rem;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            font-family: inherit;
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-gradient"></div>
+
+    <div class="container animate-fade">
+        <nav style="display: flex; justify-content: flex-start; align-items: center; padding: 1rem 0;">
+            <a href="index.html" class="btn btn-outline" style="text-decoration: none;">
+                <i class="fas fa-arrow-left"></i> กลับหน้าหลัก
+            </a>
+        </nav>
+
+        <div class="login-container">
+            <div class="login-card">
+                <i class="fas fa-user-shield login-icon"></i>
+                <h2 style="margin-bottom: 0.5rem; color: #fff;">เข้าสู่ระบบช่างซ่อม</h2>
+                <p style="color: var(--text-muted); margin-bottom: 2rem; font-size: 0.9rem;">
+                    กรุณากรอกรหัสผ่านเพื่อเข้าใช้งานโหมด Admin
+                </p>
+
+                <form id="loginForm">
+                    <input type="password" id="adminPassword" class="form-control" placeholder="••••••••" required autofocus>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem; border-radius: 10px;">
+                        <i class="fas fa-sign-in-alt"></i> ยืนยันการเข้าสู่ระบบ
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <footer style="text-align:center; margin-top:4rem; padding: 2rem 0; border-top: 1px solid rgba(255,255,255,0.05); color: #ccc; font-size:0.85rem; line-height: 1.6; padding-bottom: 3rem;">
+            <div>© 2026 BEN2 Maintenance System | ระบบแจ้งซ่อมอุปกรณ์สื่อ</div>
+            
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed rgba(255,255,255,0.1); display: inline-block;">
+                <div style="color: #FFD700; font-weight: bold; font-size: 0.95rem; margin-bottom: 0.3rem;">
+                    <i class="fas fa-laptop-code"></i> พัฒนาระบบโดย: นายวีระภัทร อ่วมเกษม
+                </div>
+                <div style="font-size: 0.8rem; color: #999;">
+                    <i class="fas fa-user-graduate"></i> นักศึกษาเทคโนโลยีคอมพิวเตอร์ KMITL ชั้นปีที่ 2
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- SweetAlert2 (ใช้งานล่าสุดจากที่เพิ่มมาใน index.html) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>

@@ -7,15 +7,44 @@ function getBase64(file) {
     });
 }
 
-// 🔒 ระบบป้องกันหน้า Admin (รหัสผ่านคือ 1234)
+// 🔒 ระบบป้องกันหน้า Admin
 if (window.location.pathname.includes('admin.html')) {
-    const password = prompt("กรุณาใส่รหัสผ่านช่างเพื่อเข้าสู่ระบบ (ค่าเริ่มต้น: 1234):");
-    if (password !== "1234") {
-        alert("รหัสผ่านไม่ถูกต้อง!");
-        window.location.href = "index.html";
+    if (sessionStorage.getItem("adminLoggedIn") !== "true") {
+        window.location.href = "login.html";
     } else {
         loadAdminDashboard(); // ถ้ารหัสถูก โหลดข้อมูลเลย
     }
+}
+
+// 🚪 ระบบออกจากระบบ
+const logoutBtn = document.getElementById('logoutBtn');
+if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+        sessionStorage.removeItem("adminLoggedIn");
+    });
+}
+
+// 🔑 ระบบเข้าสู่ระบบ (login.html)
+const loginForm = document.getElementById('loginForm');
+if (loginForm) {
+    loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const password = document.getElementById('adminPassword').value;
+        if (password === "1234") {
+            sessionStorage.setItem("adminLoggedIn", "true");
+            Swal.fire({
+                icon: 'success',
+                title: 'เข้าสู่ระบบสำเร็จ!',
+                showConfirmButton: false,
+                timer: 1500
+            }).then(() => {
+                window.location.href = "admin.html";
+            });
+        } else {
+            Swal.fire('รหัสผ่านไม่ถูกต้อง', 'กรุณาลองใหม่อีกครั้ง', 'error');
+            document.getElementById('adminPassword').value = '';
+        }
+    });
 }
 
 // --- 1. หน้าแจ้งซ่อม (index.html) ---
