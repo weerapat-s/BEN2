@@ -102,6 +102,41 @@
         </footer>
     </div>
 
-    <script src="app.js"></script>
-</body>
+    <script type="module">
+        import { submitTicket } from './app.js';
+
+        const repairForm = document.getElementById('repairForm');
+        if (repairForm) {
+            repairForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const submitBtn = document.getElementById('submitBtn');
+                const originalBtnContent = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังอัปโหลดข้อมูล... (อาจใช้เวลาสักครู่)';
+                submitBtn.disabled = true;
+
+                const ticketData = {
+                    reporter_name: document.getElementById('reporterName').value,
+                    equipment_type: document.getElementById('equipmentType').value,
+                    location: document.getElementById('location').value,
+                    issue_detail: document.getElementById('issueDetail').value
+                };
+                
+                const fileInput = document.getElementById('imageFile');
+                const imageFile = fileInput.files.length > 0 ? fileInput.files[0] : null;
+
+                const success = await submitTicket(ticketData, imageFile);
+                
+                if (success) {
+                    alert('ส่งใบแจ้งซ่อมเรียบร้อยแล้ว!');
+                    repairForm.reset();
+                    window.location.href = "dashboard.html";
+                } else {
+                    submitBtn.innerHTML = originalBtnContent;
+                    submitBtn.disabled = false;
+                    alert('ไม่สามารถอัปโหลดข้อมูลได้ กรุณาลองใหม่ (โปรดตรวจสอบการตั้งค่า Deploy ใน Apps Script ว่าเป็น Anyone)');
+                }
+            });
+        }
+    </script>
 </html>

@@ -15,22 +15,21 @@
             <div class="logo">
                 <a href="index.html" style="text-decoration:none; color:inherit;"><i class="fas fa-tools"></i> BEN2 Maintenance</a>
             </div>
-            <div id="user-section" style="display:none;" class="user-profile">
-                <span id="user-name"></span>
-                <img id="user-avatar" class="profile-img">
-                <button id="logout-btn" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.8rem;">ออกจากระบบ</button>
-            </div>
-            <button id="auth-btn" class="btn btn-primary" style="display:none;">
-                <i class="fab fa-google"></i> เข้าสู่ระบบด้วย Google
-            </button>
+            <!-- Auth section removed since we migrated to Google Sheets -->
+            <div style="flex:1"></div>
+            <a href="admin.html" class="btn btn-outline" style="text-decoration:none; font-size:0.8rem;"><i class="fas fa-user-shield"></i> เข้าสู่ระบบช่าง (Admin)</a>
         </nav>
 
-        <section class="private-content" style="display:none;">
+        <section class="private-content">
             <div class="grid grid-cols-2">
                 <!-- Form Section -->
                 <div class="card">
-                    <h2 style="margin-bottom:1.5rem; color:var(--accent)"><i class="fas fa-plus-circle"></i> แจ้งซ่อมใหม่</h2>
+                    <h2 style="margin-bottom:1.5rem; color:var(--accent)"><i class="fas fa-plus-circle"></i> แจ้งซ่อมใหม่ (ด่วน)</h2>
                     <form id="ticket-form">
+                        <div class="form-group">
+                            <label><i class="fas fa-user"></i> ชื่อผู้แจ้ง</label>
+                            <input type="text" id="reporter-name" placeholder="ชื่อ-สกุล" required>
+                        </div>
                         <div class="form-group">
                             <label><i class="fas fa-tv"></i> ประเภทอุปกรณ์</label>
                             <input type="text" id="equipment-type" placeholder="เช่น ทีวี, ลำโพง, โปรเจคเตอร์" required>
@@ -56,7 +55,10 @@
                 <!-- Stats/Instructions Section -->
                 <div>
                     <div id="list" style="margin-top:0;">
-                        <h2 style="margin-bottom:1.5rem; color:var(--accent)"><i class="fas fa-clipboard-list"></i> รายการแจ้งซ่อมทางโรงเรียน</h2>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                            <h2 style="margin: 0; color:var(--accent)"><i class="fas fa-clipboard-list"></i> รายการแจ้งซ่อมทั้งหมด</h2>
+                            <button id="refresh-btn" class="btn btn-outline" style="padding: 0.5rem;"><i class="fas fa-sync-alt"></i></button>
+                        </div>
                         <div id="tickets-list" class="grid" style="gap:1rem; max-height: 800px; overflow-y: auto; padding-right: 0.5rem;">
                             <!-- Tickets populated by app.js -->
                             <div class="card" style="text-align:center; color:var(--text-muted)">กำลังโหลดข้อความ...</div>
@@ -64,13 +66,6 @@
                     </div>
                 </div>
             </div>
-        </section>
-
-        <section class="public-content" style="text-align:center; padding: 4rem 0;">
-            <i class="fas fa-lock" style="font-size:3rem; color:var(--accent); margin-bottom:1rem;"></i>
-            <h2>กรุณาเข้าสู่ระบบ</h2>
-            <p style="color:var(--text-muted); margin-bottom:2rem;">โปรดใช้อีเมล @gmail.com เพื่อดเข้าสู่ระบบแจ้งซ่อม</p>
-            <button onclick="document.getElementById('auth-btn').click()" class="btn btn-primary">เข้าสู่ระบบด้วย Google</button>
         </section>
 
         <footer style="text-align:center; margin-top:6rem; padding: 2rem 0; border-top: 1px solid rgba(255,255,255,0.05); color:var(--text-muted); font-size:0.8rem;">
@@ -89,11 +84,13 @@
     </div>
 
     <script type="module">
-        import { submitTicket } from './app.js';
+        import { submitTicket, fetchTickets } from './app.js';
         
         const form = document.getElementById('ticket-form');
         const submitBtn = document.getElementById('submit-btn');
         const successModal = document.getElementById('success-modal');
+        const listContainer = document.getElementById('tickets-list');
+        const refreshBtn = document.getElementById('refresh-btn');
 
         form.onsubmit = async (e) => {
             e.preventDefault();
@@ -102,11 +99,14 @@
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังส่งข้อมูล...';
 
             const ticketData = {
+                reporter_name: document.getElementById('reporter-name').value,
                 equipment_type: document.getElementById('equipment-type').value,
                 location: document.getElementById('location').value,
                 issue_detail: document.getElementById('issue-detail').value
             };
-            const imageFile = document.getElementById('image-file').files[0];
+            
+            const fileInput = document.getElementById('image-file');
+            const imageFile = fileInput.files.length > 0 ? fileInput.files[0] : null;
 
             const success = await submitTicket(ticketData, imageFile);
             
@@ -116,11 +116,57 @@
             if (success) {
                 form.reset();
                 successModal.style.display = 'flex';
+                loadTickets(); // Refresh list automatically
             } else {
-                alert('เกิดข้อผิดพลาดในการส่งข้อมูล');
+                alert('เกิดข้อผิดพลาดในการส่งข้อมูล โปรดตรวจสอบการ Deploy (Anyone) ใน Apps Script');
             }
         };
+
+        const getStatusClass = (status) => {
+            if (status === 'รอดำเนินการ') return 'status-pending';
+            if (status === 'กำลังดำเนินการ') return 'status-progress';
+            if (status === 'ซ่อมเสร็จสิ้น') return 'status-done';
+            return '';
+        };
+
+        async function loadTickets() {
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            refreshBtn.disabled = true;
+
+            const tickets = await fetchTickets();
+            
+            if (tickets.length === 0) {
+                listContainer.innerHTML = '<div class="card" style="text-align:center; color:var(--text-muted)">ยังไม่มีรายการแจ้งซ่อม หรือไม่สามารถเชื่อมต่อฐานข้อมูลได้</div>';
+            } else {
+                // Reverse to show newest first
+                const reversed = [...tickets].reverse();
+                listContainer.innerHTML = reversed.map(ticket => `
+                    <div class="card animate-fade" style="padding: 1rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:0.5rem;">
+                            <div>
+                                <h4 style="color:var(--accent); margin:0;">${ticket.equipment_type}</h4>
+                                <p style="font-size:0.8rem; color:var(--text-muted); margin:0;">${ticket.location}</p>
+                            </div>
+                            <span class="badge ${getStatusClass(ticket.status)}" style="font-size:0.7rem;">${ticket.status}</span>
+                        </div>
+                        <p style="margin-bottom:0.5rem; font-size:0.85rem">${ticket.issue_detail}</p>
+                        <div style="font-size:0.75rem; color:var(--text-muted);">
+                            <i class="fas fa-user"></i> ${ticket.reporter_name || 'ไม่ระบุ'} | <i class="fas fa-clock"></i> ${ticket.created_at}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i>';
+            refreshBtn.disabled = false;
+        }
+
+        // Initial Load
+        loadTickets();
+        
+        // Refresh on click
+        refreshBtn.onclick = loadTickets;
+
     </script>
-    <script type="module" src="app.js"></script>
 </body>
 </html>
