@@ -1,4 +1,4 @@
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzgm-hwW_uccWNHkz9y850ACF0pdDlp-NV8LW7gmxWMMvBBS2zLzl4VWbbiE9UVU68frw/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxSGxsXNH-h0WYnvCFKvRnaQvrcAn7XrCzZ6O4Sp1zuXDRwt7u9l-dgOW_8CYO2PDu48A/exec";
 
 function getBase64(file) {
     return new Promise((resolve, reject) => {
