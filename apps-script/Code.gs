@@ -1,20 +1,35 @@
 /**
- * BEN2 Maintenance — backend (Google Apps Script Web app)
+ * BEN2 Maintenance — backend (Google Apps Script Web app) — API v2
  *
- * API (ตรงกับที่ app.js เรียกอยู่):
- *   GET                      -> JSON array ของใบแจ้งซ่อมทั้งหมด (เก่า -> ใหม่)
- *   POST {action:"create"}   -> บันทึกใบแจ้งซ่อมใหม่ (+ รูป base64 ไปเก็บใน Drive)
- *   POST {action:"update"}   -> เปลี่ยนสถานะ / ข้อความจากช่าง
+ *   GET  ?ids=BEN2-1,BEN2-2        -> JSON array: only the tickets whose ids are listed (public)
+ *   POST {action:"create", ...}    -> new ticket (public, rate limited)
+ *   POST {action:"login", password}-> {status:"success", token}
+ *   POST {action:"list", token}    -> {status:"success", tickets:[...all...]}
+ *   POST {action:"update", token, ticket_id, status, admin_note}
  *
- * ตั้งค่าครั้งแรก: เลือกฟังก์ชัน setup แล้วกด Run (จะขออนุญาต Sheets + Drive)
- * ระบบสร้าง Google Sheet และโฟลเดอร์รูปให้เอง ดู URL ใน Execution log
+ * Errors: {status:"error", code, message}
+ *   code = unauthorized | rate_limited | invalid | not_found | server
+ *
+ * ตั้งค่าครั้งแรก (ดู README):
+ *   1) Project Settings > Script properties > เพิ่ม ADMIN_PASSWORD = รหัสผ่านของช่าง
+ *   2) เลือกฟังก์ชัน setup แล้วกด Run (ระบบสร้าง Google Sheet + โฟลเดอร์รูปให้เอง)
+ *   3) Deploy > Web app (Execute as: Me, Who has access: Anyone)
  */
 
 var HEADERS = ['timestamp', 'ticket_id', 'reporter_name', 'equipment_type', 'location',
                'issue_detail', 'image_url', 'status', 'admin_note', 'updated_at'];
 var SHEET_NAME = 'Tickets';
 var STATUSES = ['รอรับเรื่อง', 'กำลังดำเนินการ', 'เสร็จสิ้น'];
-var MAX_TEXT = 2000;
+
+var MAX_SHORT = 200;            // ชื่อ / สถานที่
+var MAX_TEXT = 2000;            // อาการ / โน้ต
+var MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+var MAX_IDS = 50;
+var TOKEN_TTL_SEC = 21600;      // CacheService รองรับสูงสุด 6 ชม.
+var LOGIN_MAX_FAILS = 5;
+var LOGIN_WINDOW_MS = 10 * 60 * 1000;
+var CREATE_MAX = 30;
+var CREATE_WINDOW_MS = 10 * 60 * 1000;
 
 /* ---------- Setup ---------- */
 
@@ -22,6 +37,9 @@ function setup() {
   var sheet = getSheet_();
   getImageFolder_();
   console.log('Sheet: ' + sheet.getParent().getUrl());
+  if (!PropertiesService.getScriptProperties().getProperty('ADMIN_PASSWORD')) {
+    console.log('ยังไม่ได้ตั้ง ADMIN_PASSWORD ใน Script properties — ช่างจะล็อกอินไม่ได้');
+  }
 }
 
 function getSheet_() {
@@ -55,49 +73,127 @@ function getImageFolder_() {
   return folder;
 }
 
-/* ---------- HTTP ---------- */
+/* ---------- Helpers ---------- */
+
+function nowMs_() { return Date.now(); }
 
 function json_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
 
-function doGet() {
+function err_(code, message) {
+  return { status: 'error', code: code, message: message };
+}
+
+function clean_(v, max) {
+  return String(v == null ? '' : v).trim().slice(0, max || MAX_TEXT);
+}
+
+// กันสูตร Google Sheets (=, +, -, @) ที่ผู้ใช้ใส่มา
+function safeCell_(s) {
+  return /^[=+\-@]/.test(s) ? "'" + s : s;
+}
+
+// ตัวนับแบบหน้าต่างเวลาคงที่ (fixed window) เก็บใน CacheService
+function bucketKey_(name, windowMs) {
+  return name + '_' + Math.floor(nowMs_() / windowMs);
+}
+
+function counterGet_(name, windowMs) {
+  return parseInt(CacheService.getScriptCache().get(bucketKey_(name, windowMs)) || '0', 10);
+}
+
+function counterInc_(name, windowMs) {
+  var cache = CacheService.getScriptCache();
+  var key = bucketKey_(name, windowMs);
+  var n = parseInt(cache.get(key) || '0', 10) + 1;
+  cache.put(key, String(n), Math.ceil((windowMs * 2) / 1000));
+  return n;
+}
+
+/* ---------- Auth ---------- */
+
+function safeEqual_(a, b) {
+  a = String(a); b = String(b);
+  var diff = a.length ^ b.length;
+  for (var i = 0; i < Math.max(a.length, b.length); i++) {
+    diff |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0);
+  }
+  return diff === 0;
+}
+
+function login_(d) {
+  if (counterGet_('loginfail', LOGIN_WINDOW_MS) >= LOGIN_MAX_FAILS) {
+    return err_('rate_limited', 'ใส่รหัสผิดหลายครั้ง กรุณารอ 10 นาทีแล้วลองใหม่');
+  }
+  var expected = PropertiesService.getScriptProperties().getProperty('ADMIN_PASSWORD');
+  if (!expected || !safeEqual_(d.password == null ? '' : d.password, expected)) {
+    counterInc_('loginfail', LOGIN_WINDOW_MS);
+    return err_('unauthorized', 'รหัสผ่านไม่ถูกต้อง');
+  }
+  var token = Utilities.getUuid();
+  CacheService.getScriptCache().put('tok_' + token, '1', TOKEN_TTL_SEC);
+  return { status: 'success', token: token };
+}
+
+function tokenOk_(token) {
+  return typeof token === 'string' && token.length >= 32 &&
+    CacheService.getScriptCache().get('tok_' + token) === '1';
+}
+
+/* ---------- HTTP ---------- */
+
+function doGet(e) {
   try {
-    return json_(listTickets_());
-  } catch (err) {
-    return json_({ status: 'error', message: String(err) });
+    var raw = e && e.parameter && e.parameter.ids ? String(e.parameter.ids) : '';
+    var ids = raw.split(',').map(function (s) { return s.trim(); })
+      .filter(function (s) { return /^BEN2-\d{1,6}$/.test(s); })
+      .slice(0, MAX_IDS);
+    return json_(ids.length ? listTickets_(ids) : []);
+  } catch (error) {
+    console.error(error);
+    return json_(err_('server', 'เกิดข้อผิดพลาดที่เซิร์ฟเวอร์'));
   }
 }
 
 function doPost(e) {
   var lock = LockService.getScriptLock();
+  var locked = false;
   try {
-    lock.waitLock(20000);
     var d = JSON.parse(e.postData.contents);
-    if (d.action === 'create') return json_(createTicket_(d));
-    if (d.action === 'update') return json_(updateTicket_(d));
-    return json_({ status: 'error', message: 'unknown action' });
-  } catch (err) {
-    console.error(err);
-    return json_({ status: 'error', message: String(err) });
+    if (d.action === 'login') return json_(login_(d));
+    if (d.action === 'list') {
+      if (!tokenOk_(d.token)) return json_(err_('unauthorized', 'กรุณาเข้าสู่ระบบ'));
+      return json_({ status: 'success', tickets: listTickets_(null) });
+    }
+    if (d.action === 'create' || d.action === 'update') {
+      if (d.action === 'update' && !tokenOk_(d.token)) {
+        return json_(err_('unauthorized', 'กรุณาเข้าสู่ระบบ'));
+      }
+      lock.waitLock(20000);
+      locked = true;
+      return json_(d.action === 'create' ? createTicket_(d) : updateTicket_(d));
+    }
+    return json_(err_('invalid', 'unknown action'));
+  } catch (error) {
+    console.error(error);
+    return json_(err_('server', 'เกิดข้อผิดพลาดที่เซิร์ฟเวอร์'));
   } finally {
-    lock.releaseLock();
+    if (locked) lock.releaseLock();
   }
 }
 
 /* ---------- Tickets ---------- */
 
-function clean_(v) {
-  return String(v == null ? '' : v).trim().slice(0, MAX_TEXT);
-}
-
-function listTickets_() {
+function listTickets_(onlyIds) {
   var sheet = getSheet_();
   var last = sheet.getLastRow();
   if (last < 2) return [];
   var rows = sheet.getRange(2, 1, last - 1, HEADERS.length).getValues();
-  return rows.map(function (r) {
-    return {
+  var out = [];
+  rows.forEach(function (r) {
+    if (onlyIds && onlyIds.indexOf(r[1]) === -1) return;
+    out.push({
       timestamp: r[0] instanceof Date ? r[0].toISOString() : String(r[0]),
       ticket_id: r[1],
       reporter_name: r[2],
@@ -107,8 +203,9 @@ function listTickets_() {
       image_url: r[6] || '-',
       status: r[7],
       admin_note: r[8] || '-'
-    };
+    });
   });
+  return out;
 }
 
 function findRow_(sheet, ticketId) {
@@ -122,7 +219,7 @@ function findRow_(sheet, ticketId) {
 }
 
 function newTicketId_(sheet, wanted) {
-  var id = clean_(wanted);
+  var id = clean_(wanted, 20);
   if (!/^BEN2-\d{1,6}$/.test(id) || findRow_(sheet, id) !== -1) {
     do {
       id = 'BEN2-' + Math.floor(1000 + Math.random() * 9000);
@@ -131,27 +228,35 @@ function newTicketId_(sheet, wanted) {
   return id;
 }
 
+// คืน '-' ถ้าไม่มีรูป / ไม่ใช่รูป, คืน null ถ้าไฟล์ใหญ่เกินกำหนด
 function saveImage_(dataUrl, ticketId) {
-  var m = /^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/.exec(dataUrl || '');
+  var m = /^data:(image\/(?:png|jpeg|webp|gif));base64,([A-Za-z0-9+\/=]+)$/.exec(dataUrl || '');
   if (!m) return '-';
+  if (m[2].length > MAX_IMAGE_BYTES * 1.4) return null;
+  var bytes = Utilities.base64Decode(m[2]);
+  if (bytes.length > MAX_IMAGE_BYTES) return null;
   var ext = m[1].split('/')[1].replace('jpeg', 'jpg');
-  var blob = Utilities.newBlob(Utilities.base64Decode(m[2]), m[1], ticketId + '.' + ext);
+  var blob = Utilities.newBlob(bytes, m[1], ticketId + '.' + ext);
   var file = getImageFolder_().createFile(blob);
   file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
   return 'https://drive.google.com/uc?export=view&id=' + file.getId();
 }
 
 function createTicket_(d) {
-  var name = clean_(d.reporter_name), type = clean_(d.equipment_type),
-      place = clean_(d.location), detail = clean_(d.issue_detail);
-  if (!name || !type || !place || !detail) {
-    return { status: 'error', message: 'กรอกข้อมูลไม่ครบ' };
+  var name = clean_(d.reporter_name, MAX_SHORT), type = clean_(d.equipment_type, MAX_SHORT),
+      place = clean_(d.location, MAX_SHORT), detail = clean_(d.issue_detail, MAX_TEXT);
+  if (!name || !type || !place || !detail) return err_('invalid', 'กรอกข้อมูลไม่ครบ');
+  if (counterGet_('creates', CREATE_WINDOW_MS) >= CREATE_MAX) {
+    return err_('rate_limited', 'มีการแจ้งเข้ามาถี่เกินไป กรุณารอสักครู่แล้วลองใหม่');
   }
   var sheet = getSheet_();
   var ticketId = newTicketId_(sheet, d.ticket_id);
   var imageUrl = saveImage_(d.imageBase64, ticketId);
+  if (imageUrl === null) return err_('invalid', 'รูปภาพใหญ่เกินไป (สูงสุด 4 MB)');
+  counterInc_('creates', CREATE_WINDOW_MS);
   var now = new Date();
-  sheet.appendRow([now, ticketId, name, type, place, detail, imageUrl, STATUSES[0], '', now]);
+  sheet.appendRow([now, ticketId, safeCell_(name), safeCell_(type), safeCell_(place), safeCell_(detail),
+                   imageUrl, STATUSES[0], '', now]);
 
   if (typeof notifyNewTicket === 'function') {
     notifyNewTicket({ ticket_id: ticketId, reporter_name: name, equipment_type: type,
@@ -161,18 +266,17 @@ function createTicket_(d) {
 }
 
 function updateTicket_(d) {
-  var status = clean_(d.status);
-  if (STATUSES.indexOf(status) === -1) {
-    return { status: 'error', message: 'สถานะไม่ถูกต้อง' };
-  }
+  var status = clean_(d.status, MAX_SHORT);
+  if (STATUSES.indexOf(status) === -1) return err_('invalid', 'สถานะไม่ถูกต้อง');
   var sheet = getSheet_();
-  var row = findRow_(sheet, clean_(d.ticket_id));
-  if (row === -1) return { status: 'error', message: 'ไม่พบรหัสงานนี้' };
-  var note = clean_(d.admin_note);
-  sheet.getRange(row, 8, 1, 3).setValues([[status, note, new Date()]]);
+  var id = clean_(d.ticket_id, 20);
+  var row = findRow_(sheet, id);
+  if (row === -1) return err_('not_found', 'ไม่พบรหัสงานนี้');
+  var note = clean_(d.admin_note, MAX_TEXT);
+  sheet.getRange(row, 8, 1, 3).setValues([[status, safeCell_(note), new Date()]]);
 
   if (typeof notifyTicketUpdate === 'function') {
-    notifyTicketUpdate({ ticket_id: clean_(d.ticket_id), status: status, admin_note: note });
+    notifyTicketUpdate({ ticket_id: id, status: status, admin_note: note });
   }
   return { status: 'success' };
 }
