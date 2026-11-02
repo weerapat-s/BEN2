@@ -3,8 +3,11 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
-function loadBackend({ props = {} } = {}) {
-  const store = { props: Object.assign({}, props), rows: [], cache: {}, files: [], notified: [] };
+// opts.line: also load LineNotify.gs (instead of stubbing the notify* hooks) and fake UrlFetchApp.
+// opts.lineResponse: {code, body} the fake LINE API answers with; or {throws: 'msg'} to simulate a network failure.
+function loadBackend({ props = {}, line = false, lineResponse = { code: 200, body: '{}' } } = {}) {
+  const store = { props: Object.assign({}, props), rows: [], cache: {}, files: [], notified: [],
+                  fetches: [], logs: [], errors: [], events: [] };
   let uuid = 0;
 
   const sheet = {
@@ -27,7 +30,18 @@ function loadBackend({ props = {} } = {}) {
   };
 
   const ctx = {
-    console: { log() {}, error() {} },
+    console: {
+      log: (...a) => store.logs.push(a.join(' ')),
+      error: (...a) => store.errors.push(a.join(' ')),
+    },
+    UrlFetchApp: {
+      fetch: (url, opts) => {
+        store.events.push('fetch');
+        store.fetches.push({ url, opts, payload: opts && opts.payload ? JSON.parse(opts.payload) : null });
+        if (lineResponse.throws) throw new Error(lineResponse.throws);
+        return { getResponseCode: () => lineResponse.code, getContentText: () => lineResponse.body };
+      },
+    },
     SpreadsheetApp: { create: () => ss, openById: () => ss },
     PropertiesService: {
       getScriptProperties: () => ({
@@ -53,16 +67,25 @@ function loadBackend({ props = {} } = {}) {
       newBlob: (bytes, type, name) => ({ bytes, type, name }),
       getUuid: () => 'uuid-' + String(++uuid).padStart(31, '0'),
     },
-    LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
+    LockService: {
+      getScriptLock: () => ({
+        waitLock: () => store.events.push('lock'),
+        releaseLock: () => store.events.push('unlock'),
+      }),
+    },
     ContentService: {
       MimeType: { JSON: 'json' },
       createTextOutput: (s) => ({ s, setMimeType() { return this; } }),
     },
-    notifyNewTicket: (d, img) => store.notified.push(['new', d.ticket_id, img]),
-    notifyTicketUpdate: (d) => store.notified.push(['upd', d.ticket_id, d.status]),
   };
+  if (!line) {
+    ctx.notifyNewTicket = (d, img) => store.notified.push(['new', d.ticket_id, img]);
+    ctx.notifyTicketUpdate = (d) => store.notified.push(['upd', d.ticket_id, d.status]);
+  }
   vm.createContext(ctx);
-  vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'apps-script', 'Code.gs'), 'utf8'), ctx);
+  const gs = (name) => fs.readFileSync(path.join(__dirname, '..', 'apps-script', name), 'utf8');
+  vm.runInContext(gs('Code.gs'), ctx);
+  if (line) vm.runInContext(gs('LineNotify.gs'), ctx);
 
   return {
     ctx,

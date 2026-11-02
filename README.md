@@ -40,19 +40,43 @@ python -m http.server 8000
 - **รหัสผู้ดูแลเดิม (`Newlnwza007` / `admin123`) เคยอยู่ในโค้ดสาธารณะบน GitHub ถือว่ารั่วแล้ว อย่านำกลับมาใช้**
 - ข้อจำกัด: เว็บ static ใครก็เปิดดูซอร์สหน้าเว็บได้ ความลับต้องอยู่ใน Script properties เท่านั้น
 
-## แจ้งเตือนเข้า LINE กลุ่ม (ยังไม่เปิดใช้)
+## แจ้งเตือนเข้า LINE กลุ่ม
 
+เมื่อมีใบแจ้งซ่อมใหม่ ระบบส่งข้อความเข้ากลุ่ม LINE ของช่าง (รหัสงาน อุปกรณ์ สถานที่ อาการ ผู้แจ้ง ลิงก์รูป และลิงก์ไปหน้าจัดการงาน)
 ใช้ LINE Messaging API (LINE Notify ปิดบริการแล้ว) ส่งจาก Apps Script เพื่อไม่ให้ token อยู่ในหน้าเว็บ
+ถ้ายังไม่ตั้งค่า ระบบแจ้งซ่อมทำงานปกติ แค่ไม่ส่ง LINE และการส่ง LINE ล้มเหลวไม่ทำให้การแจ้งซ่อมพัง
 
-1. สร้าง LINE Official Account + Messaging API channel ที่ https://developers.line.biz/ แล้วออก **Channel access token (long-lived)**
-2. เปิด "Allow bot to join group chats" แล้วเชิญบอทเข้ากลุ่มช่าง
-3. **หา groupId**: ตั้ง Webhook URL ของ channel เป็น URL Web app, เพิ่มบรรทัดนี้ต้น `doPost` (หลัง `var d = JSON.parse(...)`) ชั่วคราว
-   `if (d.events) { logLineGroupId_(d.events); return json_({ status: 'success' }); }`
-   แล้วพิมพ์ข้อความในกลุ่ม 1 ครั้ง ดู `groupId` (ขึ้นต้น `C`) ใน Executions log จากนั้นลบบรรทัดนั้นออก
-4. **Script properties** เพิ่ม `LINE_CHANNEL_TOKEN` และ `LINE_GROUP_ID`
-5. เพิ่มไฟล์ `apps-script/LineNotify.gs` ในโปรเจกต์เดียวกัน — `Code.gs` เรียกให้เองเมื่อมีแจ้งซ่อมใหม่/ช่างอัปเดตสถานะ แล้ว Deploy เวอร์ชันใหม่
+> **โควตา:** LINE นับข้อความที่ส่งเข้ากลุ่มเป็นจำนวนสมาชิกในกลุ่ม (กลุ่ม 10 คน แจ้ง 1 ครั้ง = 10 ข้อความ)
+> ระบบจึงส่งแค่ 1 ข้อความต่อใบแจ้งซ่อม และ**ไม่แจ้งเมื่อช่างเปลี่ยนสถานะ**เป็นค่าเริ่มต้น
+> ตรวจโควตาฟรีของบัญชีใน LINE Official Account Manager ก่อนใช้งานจริง
 
-หมายเหตุ: แพ็กเกจฟรีของ LINE Official Account จำกัดจำนวนข้อความ push ต่อเดือน
+### ตั้งค่า (ทำครั้งเดียว)
+
+1. สร้าง LINE Official Account + **Messaging API channel** ที่ https://developers.line.biz/ แล้วออก **Channel access token (long-lived)**
+2. ใน LINE Official Account Manager เปิด **อนุญาตให้บอทเข้าร่วมแชทกลุ่ม** แล้วเชิญบอทเข้ากลุ่มช่าง
+3. เพิ่มไฟล์ `apps-script/LineNotify.gs` ในโปรเจกต์ Apps Script เดียวกับ `Code.gs` แล้ว Deploy เวอร์ชันใหม่ (Manage deployments > แก้ไข > New version)
+4. **หา groupId:** ที่ LINE Developers ตั้ง **Webhook URL** ของ channel เป็น URL Web app (`.../exec`) และเปิด Use webhook
+   แล้วพิมพ์ข้อความอะไรก็ได้ในกลุ่ม 1 ครั้ง กลับไปที่ Apps Script > **Executions** จะมีบรรทัด
+   `พบกลุ่ม LINE → ตั้ง Script property LINE_GROUP_ID = Cxxxxxxxx...` ให้คัดลอกค่านั้น
+   (ปุ่ม Verify ของ LINE จะขึ้น error ได้ เพราะ Apps Script ตอบกลับด้วย redirect แต่ข้อความจากกลุ่มยังเข้ามาถึงตามปกติ)
+5. **Script properties** เพิ่ม
+
+   | ชื่อ | ค่า | จำเป็น |
+   |---|---|---|
+   | `LINE_CHANNEL_TOKEN` | Channel access token | ใช่ |
+   | `LINE_GROUP_ID` | groupId จากขั้นที่ 4 | ใช่ |
+   | `LINE_NOTIFY_UPDATES` | `true` ถ้าต้องการแจ้งเมื่อช่างเปลี่ยนสถานะด้วย | ไม่ (ค่าเริ่มต้น: ไม่แจ้ง) |
+   | `SITE_URL` | ที่อยู่เว็บในลิงก์ข้อความ | ไม่ (ค่าเริ่มต้น `https://repairben2.ienas.site`) |
+
+6. ใน Apps Script editor เลือกฟังก์ชัน **testLine** แล้วกด Run — ควรมีข้อความทดสอบเข้ากลุ่ม
+   ถ้าไม่มี ดู Executions log: จะบอกว่าขาดค่าไหน หรือ LINE ตอบ HTTP อะไรกลับมา (เช่น 401 = token ผิด, 400 = groupId ผิดหรือบอทไม่ได้อยู่ในกลุ่ม)
+7. หลังได้ groupId แล้ว จะปิด Webhook ใน LINE Developers ก็ได้ (webhook นี้ไม่ได้ทำอะไรนอกจากพิมพ์ groupId ลง log)
+
+### ข้อควรรู้
+
+- webhook ของ Apps Script ตรวจลายเซ็นของ LINE (`X-Line-Signature`) ไม่ได้ จึงออกแบบให้ไม่มีผลข้างเคียง: อ่านได้แค่ groupId ที่ถูกต้องรูปแบบแล้วพิมพ์ลง log เท่านั้น
+- การส่ง LINE เกิดหลังปล่อย lock แล้ว จึงไม่ทำให้คนอื่นที่แจ้งซ่อมพร้อมกันต้องรอ
+- ทดสอบอัตโนมัติ (`node --test`) ใช้ตัวจำลอง LINE API ไม่ได้ส่งข้อความจริง การส่งจริงต้องทดสอบด้วย `testLine`
 
 ## โครงสร้างไฟล์
 
