@@ -77,7 +77,7 @@ function homeView() {
       'โรงเรียนเบญจมราชรังสฤษฎิ์ ๒ · ',
       el('a', { href: 'https://www.ben2.ac.th/', target: '_blank', rel: 'noopener' }, 'ben2.ac.th'), ' · ',
       el('a', { href: 'admin.html' }, 'สำหรับช่าง'),
-      el('br'), 'พัฒนาระบบโดย นายวีระภัทร อ่วมเกษม และนายสุทธิพงษ์ สุขสร้อย · KMITL'));
+      el('br'), 'พัฒนาระบบโดย นายวีระภัทร อ่วมเกษม KMITL และนายสุทธิพงษ์ สุขสร้อย คุณครูที่ปรึกษา'));
 
   const ids = store.getTickets();
   if (!ids.length) {
