@@ -8,15 +8,17 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .form-group { text-align: left; margin-bottom: 1.2rem; }
+        html { scroll-behavior: smooth; }
+        #repair { scroll-margin-top: 1rem; }
         input[type="file"]::file-selector-button {
             background: var(--primary);
             color: #fff;
             border: none;
             padding: 0.5rem 1rem;
-            border-radius: 5px;
+            border-radius: 999px;
             cursor: pointer;
             margin-right: 1rem;
+            font-family: inherit;
         }
     </style>
 </head>
@@ -37,118 +39,98 @@
         </div>
     </div>
 
-    <div class="bg-gradient"></div>
+    <div id="site-header"></div>
 
-    <div class="container animate-fade">
-        <nav style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0;">
-            <div class="logo" style="font-weight: bold; font-size: 1.2rem;">
-                <i class="fas fa-tools" style="color: var(--accent, #FFD700);"></i> BEN2 Maintenance
+    <!-- Hero -->
+    <section class="hero">
+        <div class="wrap">
+            <div>
+                <h1>ระบบแจ้งซ่อม<br><span>อุปกรณ์สื่อออนไลน์</span></h1>
+                <p>โรงเรียนเบญจมราชรังสฤษฎิ์ ๒ (BEN2) — แจ้งรวดเร็ว ติดตามง่าย สบายใจช่าง</p>
+                <div class="hero-actions">
+                    <a href="#repair" class="btn btn-primary"><i class="fas fa-screwdriver-wrench"></i> แจ้งซ่อมเลย</a>
+                    <a href="dashboard.html" class="btn btn-outline"><i class="fas fa-clipboard-list"></i> ติดตามสถานะ</a>
+                </div>
             </div>
-            <div style="display: flex; gap: 1rem;">
-                <a href="https://www.ben2.ac.th/" target="_blank" rel="noopener" class="btn btn-outline"
-                    style="text-decoration: none; padding: 0.5rem 1rem; font-size: 0.9rem;">
-                    <i class="fas fa-school"></i> เว็บไซต์โรงเรียน
-                </a>
-                <a href="dashboard.html" class="btn btn-outline"
-                    style="text-decoration: none; padding: 0.5rem 1rem; font-size: 0.9rem;">
-                    <i class="fas fa-clipboard-list"></i> ติดตามสถานะ
-                </a>
-                <a href="admin.html" class="btn btn-primary"
-                    style="text-decoration: none; padding: 0.5rem 1rem; font-size: 0.9rem;">
-                    <i class="fas fa-user-shield"></i> ผู้ดูแลระบบ (Admin)
-                </a>
-            </div>
-        </nav>
+            <div class="hero-art"><div class="ring"><i class="fas fa-tools"></i></div></div>
+        </div>
+    </section>
 
-        <header style="text-align:center; padding: 2rem 0;">
-            <h1
-                style="font-size:2.5rem; margin-bottom:0.5rem; color: var(--primary);">
-                ระบบแจ้งซ่อมอุปกรณ์สื่อ</h1>
-            <p style="color:var(--text-muted, #ccc); font-size:1rem; max-width: 600px; margin: 0 auto 2rem;">
-                โรงเรียนเบญจมราชรังสฤษฎิ์ ๒ (BEN2)<br>แจ้งรวดเร็ว ติดตามง่าย สบายใจช่าง</p>
+    <main class="wrap pull-up animate-fade">
+        <!-- Repair form -->
+        <div class="card" id="repair" style="max-width: 680px; margin: 0 auto; padding: 2rem;">
+            <h2 class="section-title">แบบฟอร์มแจ้งซ่อม</h2>
+            <p class="section-sub">กรอกรายละเอียดให้ครบ ข้อมูลจะส่งถึงฝ่ายช่างทันที</p>
+            <form id="repairForm">
+                <div class="form-group">
+                    <label for="reporterName"><i class="fas fa-user"></i> ชื่อผู้แจ้งซ่อม (ชื่อ-สกุล):</label>
+                    <input type="text" id="reporterName" class="form-control" placeholder="เช่น ครูสมชาย ใจดี" required>
+                </div>
 
-            <div class="card"
-                style="max-width: 600px; margin: 0 auto;">
-                <form id="repairForm">
-                    <div class="form-group">
-                        <label for="reporterName"><i class="fas fa-user"></i> ชื่อผู้แจ้งซ่อม (ชื่อ-สกุล):</label>
-                        <input type="text" id="reporterName" class="form-control" placeholder="เช่น ครูสมชาย ใจดี"
-                            required>
-                    </div>
+                <div class="form-group">
+                    <label for="equipmentType"><i class="fas fa-desktop"></i> ประเภทอุปกรณ์:</label>
+                    <select id="equipmentType" class="form-control" required>
+                        <option value="">-- เลือกประเภทอุปกรณ์ --</option>
+                        <option value="โปรเจคเตอร์">โปรเจคเตอร์ (Projector)</option>
+                        <option value="คอมพิวเตอร์">คอมพิวเตอร์ (Computer)</option>
+                        <option value="โทรทัศน์">โทรทัศน์ (TV/Smart Board)</option>
+                        <option value="เครื่องเสียง">เครื่องเสียง / ไมโครโฟน</option>
+                        <option value="ระบบเครือข่าย">อินเทอร์เน็ต / Wi-Fi</option>
+                        <option value="อื่นๆ">อื่นๆ</option>
+                    </select>
+                </div>
 
-                    <div class="form-group">
-                        <label for="equipmentType"><i class="fas fa-desktop"></i> ประเภทอุปกรณ์:</label>
-                        <select id="equipmentType" class="form-control" required>
-                            <option value="">-- เลือกประเภทอุปกรณ์ --</option>
-                            <option value="โปรเจคเตอร์">โปรเจคเตอร์ (Projector)</option>
-                            <option value="คอมพิวเตอร์">คอมพิวเตอร์ (Computer)</option>
-                            <option value="โทรทัศน์">โทรทัศน์ (TV/Smart Board)</option>
-                            <option value="เครื่องเสียง">เครื่องเสียง / ไมโครโฟน</option>
-                            <option value="ระบบเครือข่าย">อินเทอร์เน็ต / Wi-Fi</option>
-                            <option value="อื่นๆ">อื่นๆ</option>
-                        </select>
-                    </div>
+                <div class="form-group">
+                    <label for="location"><i class="fas fa-map-marker-alt"></i> สถานที่ / ห้อง:</label>
+                    <input type="text" id="location" class="form-control" placeholder="เช่น อาคาร 1 ห้อง 114" required>
+                </div>
 
-                    <div class="form-group">
-                        <label for="location"><i class="fas fa-map-marker-alt"></i> สถานที่ / ห้อง:</label>
-                        <input type="text" id="location" class="form-control" placeholder="เช่น อาคาร 1 ห้อง 114"
-                            required>
-                    </div>
+                <div class="form-group">
+                    <label for="issueDetail"><i class="fas fa-exclamation-circle"></i> รายละเอียดอาการชำรุด:</label>
+                    <textarea id="issueDetail" class="form-control" rows="3"
+                        placeholder="ระบุอาการที่พบให้ชัดเจนที่สุด..." required></textarea>
+                </div>
 
-                    <div class="form-group">
-                        <label for="issueDetail"><i class="fas fa-exclamation-circle"></i> รายละเอียดอาการชำรุด:</label>
-                        <textarea id="issueDetail" class="form-control" rows="3"
-                            placeholder="ระบุอาการที่พบให้ชัดเจนที่สุด..." required></textarea>
-                    </div>
+                <div class="form-group">
+                    <label for="imageFile"><i class="fas fa-camera"></i> แนบรูปภาพประกอบ (ไม่บังคับ):</label>
+                    <input type="file" id="imageFile" class="form-control" accept="image/*" style="padding: 0.5rem;">
+                </div>
 
-                    <div class="form-group">
-                        <label for="imageFile"><i class="fas fa-camera"></i> แนบรูปภาพประกอบ (ไม่บังคับ):</label>
-                        <input type="file" id="imageFile" class="form-control" accept="image/*"
-                            style="padding: 0.5rem;">
-                    </div>
+                <button type="submit" id="submitBtn" class="btn btn-primary"
+                    style="width: 100%; padding: 1rem; font-size: 1.1rem; margin-top: 0.5rem;">
+                    <i class="fas fa-paper-plane"></i> ส่งใบแจ้งซ่อม
+                </button>
+            </form>
+        </div>
 
-                    <button type="submit" id="submitBtn" class="btn btn-primary"
-                        style="width: 100%; padding: 1rem; font-size: 1.1rem; margin-top: 1rem; border: none; cursor: pointer;">
-                        <i class="fas fa-paper-plane"></i> ส่งใบแจ้งซ่อม
-                    </button>
-                </form>
-            </div>
-        </header>
-
-        <section style="margin-top:2rem;" class="grid grid-cols-2">
-            <div class="card" style="text-align: center;">
-                <i class="fas fa-bolt" style="color:var(--accent, #FFD700); font-size: 2rem; margin-bottom:1rem;"></i>
-                <h4>ทำงานรวดเร็ว</h4>
-                <p style="font-size:0.9rem; color:var(--text-muted, #ccc);">ข้อมูลส่งตรงเข้า Google Sheets
-                    ของฝ่ายช่างทันที</p>
-            </div>
-            <div class="card" style="text-align: center;">
-                <i class="fas fa-shield-alt"
-                    style="color:var(--accent, #FFD700); font-size: 2rem; margin-bottom:1rem;"></i>
-                <h4>ตรวจสอบได้</h4>
-                <p style="font-size:0.9rem; color:var(--text-muted, #ccc);">คลิกที่ปุ่ม 'ติดตามสถานะ'
-                    ด้านบนเพื่อเช็คความคืบหน้า</p>
+        <!-- Steps -->
+        <section class="section">
+            <h2 class="section-title">ขั้นตอนการแจ้งซ่อม</h2>
+            <p class="section-sub">ง่าย ๆ เพียง 3 ขั้นตอน</p>
+            <div class="steps">
+                <div class="card step">
+                    <div class="num">1</div>
+                    <h4>กรอกใบแจ้งซ่อม</h4>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">ระบุอุปกรณ์ สถานที่ และอาการ พร้อมแนบรูปได้</p>
+                </div>
+                <div class="card step">
+                    <div class="num">2</div>
+                    <h4>ช่างรับเรื่อง</h4>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">ข้อมูลส่งตรงเข้า Google Sheets ของฝ่ายช่างทันที</p>
+                </div>
+                <div class="card step">
+                    <div class="num">3</div>
+                    <h4>ติดตามผล</h4>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">กด "ติดตามสถานะ" เพื่อดูความคืบหน้าและข้อความจากช่าง</p>
+                </div>
             </div>
         </section>
+    </main>
 
-        <footer
-            style="text-align:center; margin-top:4rem; padding: 2rem 0; border-top: 1px solid var(--line); color: #5b6785; font-size:0.85rem; line-height: 1.6; padding-bottom: 3rem;">
-            <div>© 2026 BEN2 Maintenance System | ระบบแจ้งซ่อมอุปกรณ์สื่อ</div>
-
-            <div
-                style="margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--line); display: inline-block;">
-                <div style="color: #FFD700; font-weight: bold; font-size: 0.95rem; margin-bottom: 0.3rem;">
-                    <i class="fas fa-laptop-code"></i> พัฒนาระบบโดย: นายวีระภัทร อ่วมเกษม
-                </div>
-                <div style="font-size: 0.8rem; color: #999;">
-                    <i class="fas fa-user-graduate"></i> นักศึกษาเทคโนโลยีคอมพิวเตอร์ KMITL ชั้นปีที่ 2
-                </div>
-            </div>
-        </footer>
-    </div>
+    <div id="site-footer"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+    <script src="layout.js"></script>
     <script src="app.js"></script>
 
     <!-- Intro Script -->

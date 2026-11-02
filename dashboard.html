@@ -14,26 +14,14 @@
     </style>
 </head>
 <body>
-    <div class="bg-gradient"></div>
+    <div id="site-header"></div>
 
     <div class="container animate-fade">
-        <nav style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0;">
-            <div class="logo" style="font-weight: bold; font-size: 1.2rem;">
-                <a href="index.html" style="color: inherit; text-decoration: none;">
-                    <i class="fas fa-tools" style="color: var(--accent, #FFD700);"></i> BEN2 Maintenance
-                </a>
-            </div>
-            <div>
-                <a href="admin.html" class="btn btn-outline" style="text-decoration: none; padding: 0.5rem 1rem; font-size: 0.9rem;">
-                    <i class="fas fa-user-cog"></i> เข้าสู่ระบบช่าง (Admin)
-                </a>
-            </div>
-        </nav>
 
         <header style="padding: 2rem 0 1rem 0; text-align: left;">
             <h2 style="display: flex; justify-content: space-between; align-items: center; margin: 0;">
                 <span><i class="fas fa-clipboard-list" style="color: var(--accent, #FFD700);"></i> รายการแจ้งซ่อมทั้งหมด</span>
-                <button onclick="loadDashboard()" class="btn btn-outline" style="padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">
+                <button onclick="loadDashboard()" class="btn btn-outline" style="padding: 0.5rem 1rem; ">
                     <i class="fas fa-sync-alt"></i> รีเฟรชข้อมูล
                 </button>
             </h2>
@@ -61,21 +49,11 @@
                 <i class="fas fa-plus"></i> กลับไปหน้าแจ้งซ่อม
             </a>
         </div>
-
-        <footer style="text-align:center; margin-top:4rem; padding: 2rem 0; border-top: 1px solid rgba(255,255,255,0.05); color: #ccc; font-size:0.85rem; line-height: 1.6; padding-bottom: 3rem;">
-            <div>© 2026 BEN2 Maintenance System | ระบบแจ้งซ่อมอุปกรณ์สื่อ</div>
-            
-            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--line); display: inline-block;">
-                <div style="color: #FFD700; font-weight: bold; font-size: 0.95rem; margin-bottom: 0.3rem;">
-                    <i class="fas fa-laptop-code"></i> พัฒนาระบบโดย: นายวีระภัทร อ่วมเกษม
-                </div>
-                <div style="font-size: 0.8rem; color: #999;">
-                    <i class="fas fa-user-graduate"></i> นักศึกษาเทคโนโลยีคอมพิวเตอร์ KMITL ชั้นปีที่ 2
-                </div>
-            </div>
-        </footer>
     </div>
 
+    <div id="site-footer"></div>
+
+    <script src="layout.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
