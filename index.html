@@ -3,148 +3,37 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบแจ้งซ่อม - โรงเรียนเบญจมราชรังสฤษฎิ์ ๒ (BEN2)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#12285A">
+    <title>BEN2 แจ้งซ่อม - โรงเรียนเบญจมราชรังสฤษฎิ์ ๒</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        html { scroll-behavior: smooth; }
-        #repair { scroll-margin-top: 1rem; }
-        input[type="file"]::file-selector-button {
-            background: var(--primary);
-            color: #fff;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 999px;
-            cursor: pointer;
-            margin-right: 1rem;
-            font-family: inherit;
-        }
-    </style>
 </head>
 
 <body>
-    <!-- Intro Screen -->
-    <div id="introScreen"
-        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; background: var(--bg-dark); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.8s ease, visibility 0.8s ease;">
-        <i class="fas fa-desktop"
-            style="font-size: 5rem; color: var(--accent); margin-bottom: 1.5rem; animation: pulse 1.5s infinite;"></i>
-        <h1 style="color: #fff; letter-spacing: 2px; font-weight: 700; margin-bottom: 0.5rem; text-align: center;">BEN2
-            Maintenance</h1>
-        <p style="color: var(--accent); font-size: 1.1rem; text-align: center;">ระบบแจ้งซ่อมอุปกรณ์สื่อออนไลน์</p>
-        <div
-            style="margin-top: 2rem; color: var(--accent); font-size: 0.85rem; text-align: center; line-height: 1.5; font-weight: 500;">
-            พัฒนาระบบโดย: นายวีระภัทร อ่วมเกษม<br>
-            นักศึกษาเทคโนโลยีคอมพิวเตอร์ KMITL ชั้นปีที่ 2
-        </div>
+    <div id="splash" class="splash" hidden>
+        <i class="fas fa-screwdriver-wrench" aria-hidden="true"></i>
+        <strong>BEN2 Maintenance</strong>
+        <span>ระบบแจ้งซ่อมอุปกรณ์สื่อออนไลน์</span>
+        <small class="muted" style="margin-top:1rem;color:#ffd700">พัฒนาระบบโดย นายวีระภัทร อ่วมเกษม · KMITL</small>
     </div>
 
-    <div id="site-header"></div>
+    <div id="demoBanner" class="banner" hidden>โหมดสาธิต — ข้อมูลเก็บในเบราว์เซอร์นี้เท่านั้น ยังไม่ได้เชื่อมต่อระบบจริง</div>
 
-    <!-- Hero -->
-    <section class="hero">
-        <div class="wrap">
-            <div>
-                <h1>ระบบแจ้งซ่อม<br><span>อุปกรณ์สื่อออนไลน์</span></h1>
-                <p>โรงเรียนเบญจมราชรังสฤษฎิ์ ๒ (BEN2) — แจ้งรวดเร็ว ติดตามง่าย สบายใจช่าง</p>
-                <div class="hero-actions">
-                    <a href="#repair" class="btn btn-primary"><i class="fas fa-screwdriver-wrench"></i> แจ้งซ่อมเลย</a>
-                    <a href="dashboard.html" class="btn btn-outline"><i class="fas fa-clipboard-list"></i> ติดตามสถานะ</a>
-                </div>
-            </div>
-            <div class="hero-art"><div class="ring"><i class="fas fa-tools"></i></div></div>
+    <header class="appbar">
+        <div class="appbar-inner">
+            <nav class="tabbar" aria-label="เมนูหลัก">
+                <a class="tab" href="#/" data-route="/"><i class="fas fa-house" aria-hidden="true"></i><span>หน้าแรก</span></a>
+                <a class="tab tab-primary" href="#/report" data-route="/report"><i class="fas fa-plus" aria-hidden="true"></i><span>แจ้งซ่อม</span></a>
+                <a class="tab" href="#/mine" data-route="/mine"><i class="fas fa-clipboard-list" aria-hidden="true"></i><span>งานของฉัน</span></a>
+            </nav>
         </div>
-    </section>
+    </header>
 
-    <main class="wrap pull-up animate-fade">
-        <!-- Repair form -->
-        <div class="card" id="repair" style="max-width: 680px; margin: 0 auto; padding: 2rem;">
-            <h2 class="section-title">แบบฟอร์มแจ้งซ่อม</h2>
-            <p class="section-sub">กรอกรายละเอียดให้ครบ ข้อมูลจะส่งถึงฝ่ายช่างทันที</p>
-            <form id="repairForm">
-                <div class="form-group">
-                    <label for="reporterName"><i class="fas fa-user"></i> ชื่อผู้แจ้งซ่อม (ชื่อ-สกุล):</label>
-                    <input type="text" id="reporterName" class="form-control" placeholder="เช่น ครูสมชาย ใจดี" required>
-                </div>
+    <main id="view" class="page" tabindex="-1"></main>
 
-                <div class="form-group">
-                    <label for="equipmentType"><i class="fas fa-desktop"></i> ประเภทอุปกรณ์:</label>
-                    <select id="equipmentType" class="form-control" required>
-                        <option value="">-- เลือกประเภทอุปกรณ์ --</option>
-                        <option value="โปรเจคเตอร์">โปรเจคเตอร์ (Projector)</option>
-                        <option value="คอมพิวเตอร์">คอมพิวเตอร์ (Computer)</option>
-                        <option value="โทรทัศน์">โทรทัศน์ (TV/Smart Board)</option>
-                        <option value="เครื่องเสียง">เครื่องเสียง / ไมโครโฟน</option>
-                        <option value="ระบบเครือข่าย">อินเทอร์เน็ต / Wi-Fi</option>
-                        <option value="อื่นๆ">อื่นๆ</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="location"><i class="fas fa-map-marker-alt"></i> สถานที่ / ห้อง:</label>
-                    <input type="text" id="location" class="form-control" placeholder="เช่น อาคาร 1 ห้อง 114" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="issueDetail"><i class="fas fa-exclamation-circle"></i> รายละเอียดอาการชำรุด:</label>
-                    <textarea id="issueDetail" class="form-control" rows="3"
-                        placeholder="ระบุอาการที่พบให้ชัดเจนที่สุด..." required></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="imageFile"><i class="fas fa-camera"></i> แนบรูปภาพประกอบ (ไม่บังคับ):</label>
-                    <input type="file" id="imageFile" class="form-control" accept="image/*" style="padding: 0.5rem;">
-                </div>
-
-                <button type="submit" id="submitBtn" class="btn btn-primary"
-                    style="width: 100%; padding: 1rem; font-size: 1.1rem; margin-top: 0.5rem;">
-                    <i class="fas fa-paper-plane"></i> ส่งใบแจ้งซ่อม
-                </button>
-            </form>
-        </div>
-
-        <!-- Steps -->
-        <section class="section">
-            <h2 class="section-title">ขั้นตอนการแจ้งซ่อม</h2>
-            <p class="section-sub">ง่าย ๆ เพียง 3 ขั้นตอน</p>
-            <div class="steps">
-                <div class="card step">
-                    <div class="num">1</div>
-                    <h4>กรอกใบแจ้งซ่อม</h4>
-                    <p style="color: var(--text-muted); font-size: 0.9rem;">ระบุอุปกรณ์ สถานที่ และอาการ พร้อมแนบรูปได้</p>
-                </div>
-                <div class="card step">
-                    <div class="num">2</div>
-                    <h4>ช่างรับเรื่อง</h4>
-                    <p style="color: var(--text-muted); font-size: 0.9rem;">ข้อมูลส่งตรงเข้า Google Sheets ของฝ่ายช่างทันที</p>
-                </div>
-                <div class="card step">
-                    <div class="num">3</div>
-                    <h4>ติดตามผล</h4>
-                    <p style="color: var(--text-muted); font-size: 0.9rem;">กด "ติดตามสถานะ" เพื่อดูความคืบหน้าและข้อความจากช่าง</p>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <div id="site-footer"></div>
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="layout.js"></script>
-    <script src="app.js"></script>
-
-    <!-- Intro Script -->
-    <script>
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                const intro = document.getElementById('introScreen');
-                if (intro) {
-                    intro.style.opacity = '0';
-                    intro.style.visibility = 'hidden';
-                }
-            }, 1200); // แสดง 1.2 วินาทีแล้วค่อยๆ หายไป
-        });
-    </script>
+    <noscript><p class="page">ต้องเปิดใช้ JavaScript เพื่อใช้งานระบบแจ้งซ่อม</p></noscript>
+    <script type="module" src="js/teacher.js"></script>
 </body>
 
 </html>
