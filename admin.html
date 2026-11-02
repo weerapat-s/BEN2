@@ -8,59 +8,25 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .table-container {
-            overflow-x: auto;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 1rem;
-            border-radius: 10px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            color: #fff;
-            text-align: left;
-        }
-
-        th {
-            padding: 1rem;
-            background: rgba(0, 0, 0, 0.3);
-            color: var(--accent, #FFD700);
-        }
-
-        td {
-            padding: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        select,
-        input[type="text"] {
-            width: 100%;
-            padding: 0.5rem;
-            border-radius: 5px;
-            border: none;
-            background: rgba(0, 0, 0, 0.5);
-            color: #fff;
-        }
+        .table-container { padding: 1rem; margin-top: 1rem; }
+        th, td { padding: 1rem; }
+        th { white-space: nowrap; }
+        td { vertical-align: top; }
     </style>
 </head>
 
 <body>
-    <div class="bg-gradient"></div>
+    <div id="site-header"></div>
     <div class="container animate-fade" style="max-width: 1000px;">
-        <nav style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0;">
-            <div class="logo"><i class="fas fa-tools" style="color: #FFD700;"></i> โหมดช่างซ่อม (Admin)</div>
-            <a href="index.html" id="logoutBtn" class="btn btn-outline" style="text-decoration: none;"><i
-                    class="fas fa-sign-out-alt"></i> ออกจากระบบ</a>
-        </nav>
         <header style="padding: 2rem 0 1rem 0;">
-            <h2><i class="fas fa-chart-line"></i> แดชบอร์ดสรุปข้อมูล</h2>
+            <h2 style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;"><span><i class="fas fa-chart-line"></i> แดชบอร์ดสรุปข้อมูล</span>
+                <a href="index.html" id="logoutBtn" class="btn btn-outline" style="padding:0.5rem 1rem; font-size:0.9rem;"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ</a></h2>
         </header>
 
         <!-- แผนภาพสรุปข้อมูล -->
         <section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
             <div class="card" style="text-align: center; padding: 1.5rem;">
-                <h3 id="statTotal" style="font-size: 2.5rem; color: #fff; margin-bottom: 0.5rem;">0</h3>
+                <h3 id="statTotal" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 0.5rem;">0</h3>
                 <p style="color: var(--text-muted); font-size: 0.9rem;"><i class="fas fa-ticket-alt"></i> งานทั้งหมด</p>
             </div>
             <div class="card" style="text-align: center; padding: 1.5rem;">
@@ -100,20 +66,10 @@
                 </tbody>
             </table>
         </div>
-
-        <footer style="text-align:center; margin-top:4rem; padding: 2rem 0; border-top: 1px solid rgba(255,255,255,0.05); color: #ccc; font-size:0.85rem; line-height: 1.6; padding-bottom: 3rem;">
-            <div>© 2026 BEN2 Maintenance System | ระบบแจ้งซ่อมอุปกรณ์สื่อ</div>
-            
-            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed rgba(255,255,255,0.1); display: inline-block;">
-                <div style="color: #FFD700; font-weight: bold; font-size: 0.95rem; margin-bottom: 0.3rem;">
-                    <i class="fas fa-laptop-code"></i> พัฒนาระบบโดย: นายวีระภัทร อ่วมเกษม
-                </div>
-                <div style="font-size: 0.8rem; color: #999;">
-                    <i class="fas fa-user-graduate"></i> นักศึกษาเทคโนโลยีคอมพิวเตอร์ KMITL ชั้นปีที่ 2
-                </div>
-            </div>
-        </footer>
     </div>
+    <div id="site-footer"></div>
+
+    <script src="layout.js"></script>
     <script src="app.js"></script>
 </body>
 
