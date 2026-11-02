@@ -7,38 +7,10 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* ตกแต่งตารางให้เข้ากับธีม Dark Mode */
-        .table-container {
-            width: 100%;
-            overflow-x: auto;
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 10px;
-            padding: 1rem;
-            margin-top: 1rem;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            color: #fff;
-            text-align: left;
-        }
-        th {
-            padding: 1rem;
-            background: rgba(0,0,0,0.3);
-            color: var(--accent, #FFD700);
-            font-weight: bold;
-            white-space: nowrap;
-        }
-        td {
-            padding: 1rem;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            vertical-align: top;
-        }
-        tr:hover td {
-            background: rgba(255,255,255,0.02);
-        }
+        .table-container { padding: 1rem; margin-top: 1rem; }
+        th, td { padding: 1rem; }
+        th { white-space: nowrap; }
+        td { vertical-align: top; }
     </style>
 </head>
 <body>
@@ -93,7 +65,7 @@
         <footer style="text-align:center; margin-top:4rem; padding: 2rem 0; border-top: 1px solid rgba(255,255,255,0.05); color: #ccc; font-size:0.85rem; line-height: 1.6; padding-bottom: 3rem;">
             <div>© 2026 BEN2 Maintenance System | ระบบแจ้งซ่อมอุปกรณ์สื่อ</div>
             
-            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed rgba(255,255,255,0.1); display: inline-block;">
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--line); display: inline-block;">
                 <div style="color: #FFD700; font-weight: bold; font-size: 0.95rem; margin-bottom: 0.3rem;">
                     <i class="fas fa-laptop-code"></i> พัฒนาระบบโดย: นายวีระภัทร อ่วมเกษม
                 </div>

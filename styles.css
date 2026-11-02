@@ -1,17 +1,19 @@
-/* styles.css */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* styles.css — ธีมสีน้ำเงินกรมท่า-ทอง ตามเว็บไซต์โรงเรียน https://www.ben2.ac.th/ */
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
 
 :root {
-    --primary: #0033a0; /* Royal Blue */
-    --accent: #FFD700;  /* Bright Yellow / Gold */
-    --bg-dark: #001845; /* Very Dark Blue */
-    --bg-card: #002868; /* Card Dark Blue */
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
+    --primary: #12285A;   /* น้ำเงินกรมท่า (สีหลักเว็บโรงเรียน) */
+    --accent: #FFD700;    /* ทอง */
+    --accent-dark: #b8860b;
+    --bg-dark: #12285A;   /* พื้นหลังแถบ/ intro */
+    --bg-page: #f3f5fa;   /* พื้นหน้าเว็บ */
+    --bg-card: #ffffff;
+    --text-main: #1b2540;
+    --text-muted: #5b6785;
+    --line: #dde3f0;
     --success: #1dd1a1;
     --warning: #feca57;
     --error: #ff6b6b;
-    --glass: rgba(0, 40, 104, 0.7);
 }
 
 * {
@@ -21,107 +23,105 @@
 }
 
 body {
-    font-family: 'Inter', sans-serif;
-    background-color: var(--bg-dark);
+    font-family: 'Sarabun', sans-serif;
+    background-color: var(--bg-page);
     color: var(--text-main);
     line-height: 1.6;
     overflow-x: hidden;
 }
 
-/* Glassmorphism Background Decoration */
-.bg-gradient {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    background: radial-gradient(circle at 20% 30%, rgba(0, 51, 160, 0.6) 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, rgba(255, 215, 0, 0.15) 0%, transparent 50%);
-}
+/* ไม่ใช้พื้นหลังเรืองแสงของธีมเดิมแล้ว */
+.bg-gradient { display: none; }
 
 .container {
     max-width: 1100px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 0 1.5rem 2rem;
 }
 
-/* Navbar */
+/* Navbar: แถบสีน้ำเงินกรมท่าเหมือนเว็บโรงเรียน */
 nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.5rem 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    background: var(--primary);
+    color: #fff;
+    padding: 0.9rem 1.5rem !important;
+    border-bottom: 4px solid var(--accent);
+    border-radius: 0 0 1rem 1rem;
     margin-bottom: 2rem;
+    box-shadow: 0 4px 14px rgba(18, 40, 90, 0.25);
 }
 
 .logo {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     font-weight: 700;
-    color: var(--accent);
+    color: #fff;
     display: flex;
     align-items: center;
     gap: 0.75rem;
 }
 
-.user-profile {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+nav .btn-outline {
+    border-color: var(--accent);
+    color: var(--accent);
 }
 
-.profile-img {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: 2px solid var(--accent);
+nav .btn-outline:hover {
+    background: var(--accent);
+    color: var(--primary);
 }
 
 /* Cards */
 .card {
-    background: var(--glass);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--bg-card);
+    border: 1px solid var(--line);
     border-radius: 1rem;
     padding: 1.5rem;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 14px rgba(18, 40, 90, 0.08);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 22px rgba(18, 40, 90, 0.14);
 }
 
+.card h4 { color: var(--primary); }
+
 /* Forms */
-.form-group {
-    margin-bottom: 1.5rem;
-}
+.form-group { margin-bottom: 1.5rem; }
 
 label {
     display: block;
-    font-size: 0.875rem;
+    font-size: 0.95rem;
     font-weight: 500;
-    color: var(--text-muted);
+    color: var(--primary);
     margin-bottom: 0.5rem;
 }
 
-input, select, textarea {
+input, select, textarea,
+.form-control {
     width: 100%;
-    background: rgba(15, 23, 42, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: #fff;
+    border: 1px solid #c5cde0;
     border-radius: 0.5rem;
     padding: 0.75rem;
-    color: white;
+    color: var(--text-main);
     font-family: inherit;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-input:focus, select:focus, textarea:focus {
+input:focus, select:focus, textarea:focus,
+.form-control:focus {
     outline: none;
-    border-color: var(--accent);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(18, 40, 90, 0.15);
 }
+
+.form-control option { background: #fff; color: var(--text-main); }
 
 /* Buttons */
 .btn {
@@ -135,28 +135,59 @@ input:focus, select:focus, textarea:focus {
     transition: all 0.2s;
     border: none;
     gap: 0.5rem;
+    font-family: inherit;
 }
 
 .btn-primary {
     background: var(--accent);
-    color: var(--bg-dark);
+    color: var(--primary);
 }
 
 .btn-primary:hover {
-    filter: brightness(1.1);
+    filter: brightness(1.05);
     transform: scale(1.02);
 }
 
 .btn-outline {
     background: transparent;
-    border: 1px solid var(--accent);
-    color: var(--accent);
+    border: 1px solid var(--primary);
+    color: var(--primary);
 }
 
 .btn-outline:hover {
-    background: var(--accent);
-    color: var(--bg-dark);
+    background: var(--primary);
+    color: #fff;
 }
+
+/* Tables (dashboard / admin) */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    background: #fff !important;
+    border: 1px solid var(--line) !important;
+    border-radius: 1rem !important;
+    box-shadow: 0 4px 14px rgba(18, 40, 90, 0.08);
+}
+
+table { width: 100%; border-collapse: collapse; color: var(--text-main) !important; text-align: left; }
+th { background: var(--primary) !important; color: #fff !important; }
+td { border-bottom: 1px solid var(--line) !important; }
+tr:hover td { background: #f6f8fd !important; }
+
+table select,
+table input[type="text"] {
+    border: 1px solid #c5cde0 !important;
+    background: #fff !important;
+    color: var(--text-main) !important;
+}
+
+/* สีข้อความที่ถูกเขียนเป็น inline สำหรับธีมมืดเดิม */
+a { color: var(--primary); }
+[style*="color: #ccc"], [style*="color:#ccc"] { color: var(--text-muted) !important; }
+[style*="color: #FFD700"], [style*="color:#FFD700"] { color: var(--accent-dark) !important; }
+nav [style*="color: #FFD700"], nav i[style*="FFD700"] { color: var(--accent) !important; }
+footer { border-top: 1px solid var(--line) !important; }
+.login-card h2 { color: var(--primary) !important; }
 
 /* Status Badges */
 .badge {
@@ -164,23 +195,19 @@ input:focus, select:focus, textarea:focus {
     border-radius: 9999px;
     font-size: 0.75rem;
     font-weight: 600;
-    text-transform: uppercase;
 }
 
-.status-pending { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
-.status-progress { background: rgba(16, 185, 129, 0.2); color: var(--success); }
-.status-done { background: rgba(148, 163, 184, 0.2); color: var(--text-muted); }
+.status-pending { background: rgba(245, 158, 11, 0.2); color: #b45309; }
+.status-progress { background: rgba(16, 185, 129, 0.2); color: #047857; }
+.status-done { background: rgba(148, 163, 184, 0.25); color: var(--text-muted); }
 
 /* Grid Layouts */
-.grid {
-    display: grid;
-    gap: 1.5rem;
-}
-
+.grid { display: grid; gap: 1.5rem; }
 .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
 
 @media (max-width: 768px) {
     .grid-cols-2 { grid-template-columns: 1fr; }
+    nav { border-radius: 0; }
 }
 
 /* Animations */
@@ -189,9 +216,7 @@ input:focus, select:focus, textarea:focus {
     to { opacity: 1; transform: translateY(0); }
 }
 
-.animate-fade {
-    animation: fadeIn 0.5s ease forwards;
-}
+.animate-fade { animation: fadeIn 0.5s ease forwards; }
 
 @keyframes pulse {
     0% { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 10px rgba(255,215,0,0.5)); }

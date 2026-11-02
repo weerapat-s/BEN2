@@ -8,50 +8,19 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .login-container {
-            min-height: 80vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
+        .login-container { min-height: 70vh; display: flex; align-items: center; justify-content: center; }
         .login-card {
-            background: var(--glass);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #fff;
+            border: 1px solid var(--line);
             border-radius: 1rem;
             padding: 2.5rem;
             width: 100%;
             max-width: 400px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 25px rgba(18, 40, 90, 0.15);
             text-align: center;
         }
-
-        .login-icon {
-            font-size: 3rem;
-            color: var(--accent);
-            margin-bottom: 1.5rem;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 1rem;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(0, 0, 0, 0.3);
-            color: #fff;
-            font-family: inherit;
-            font-size: 1.1rem;
-            margin-bottom: 1.5rem;
-            text-align: center;
-            letter-spacing: 2px;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
-        }
+        .login-icon { font-size: 3rem; color: var(--primary); margin-bottom: 1.5rem; }
+        .form-control { padding: 1rem; border-radius: 10px; font-size: 1.1rem; margin-bottom: 1.5rem; text-align: center; letter-spacing: 2px; }
     </style>
 </head>
 
@@ -68,7 +37,7 @@
         <div class="login-container">
             <div class="login-card">
                 <i class="fas fa-user-shield login-icon"></i>
-                <h2 style="margin-bottom: 0.5rem; color: #fff;">เข้าสู่ระบบช่างซ่อม</h2>
+                <h2 style="margin-bottom: 0.5rem; ">เข้าสู่ระบบช่างซ่อม</h2>
                 <p style="color: var(--text-muted); margin-bottom: 2rem; font-size: 0.9rem;">
                     กรุณากรอกชื่อผู้ใช้งานและรหัสผ่านเพื่อเข้าสู่ระบบ
                 </p>
@@ -86,7 +55,7 @@
         <footer style="text-align:center; margin-top:4rem; padding: 2rem 0; border-top: 1px solid rgba(255,255,255,0.05); color: #ccc; font-size:0.85rem; line-height: 1.6; padding-bottom: 3rem;">
             <div>© 2026 BEN2 Maintenance System | ระบบแจ้งซ่อมอุปกรณ์สื่อ</div>
             
-            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed rgba(255,255,255,0.1); display: inline-block;">
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--line); display: inline-block;">
                 <div style="color: #FFD700; font-weight: bold; font-size: 0.95rem; margin-bottom: 0.3rem;">
                     <i class="fas fa-laptop-code"></i> พัฒนาระบบโดย: นายวีระภัทร อ่วมเกษม
                 </div>
