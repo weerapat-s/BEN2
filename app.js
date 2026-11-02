@@ -104,11 +104,13 @@ if (repairForm) {
             console.log("ผลลัพธ์จากเซิร์ฟเวอร์:", result);
 
             if (result.status === "success") {
+                // เซิร์ฟเวอร์อาจออกรหัสใหม่ให้ถ้ารหัสที่สุ่มไปซ้ำ
+                const ticketId = result.ticket_id || payload.ticket_id;
                 // Popup แจ้งเตือนว่าสำเร็จ!
                 Swal.fire({
                     icon: 'success',
                     title: 'ส่งแจ้งเรียบร้อยแล้ว!',
-                    text: 'รหัสแจ้งซ่อมของคุณคือ: ' + payload.ticket_id,
+                    text: 'รหัสแจ้งซ่อมของคุณคือ: ' + ticketId,
                     confirmButtonText: 'ตกลง',
                     confirmButtonColor: '#1dd1a1'
                 }).then(() => {

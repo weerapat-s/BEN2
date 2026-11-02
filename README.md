@@ -1,7 +1,21 @@
 # BEN2 Maintenance — ระบบแจ้งซ่อมอุปกรณ์สื่อ (โรงเรียนเบญจมราชรังสฤษฎิ์ ๒)
 
 เว็บ: https://weerapat-s.github.io/BEN2/ — ธีมสีตามเว็บโรงเรียน https://www.ben2.ac.th/
-Backend: Google Apps Script + Google Sheets (URL อยู่ใน `app.js`)
+Backend: Google Apps Script + Google Sheets (URL อยู่ใน `app.js`, โค้ดอยู่ใน `apps-script/Code.gs`)
+
+## ติดตั้ง/ติดตั้งใหม่ Backend (Google Apps Script)
+
+ใช้เมื่อตั้งระบบครั้งแรก หรือเมื่อ URL เดิมใช้ไม่ได้ (ขึ้น 404 / "โหลดข้อมูลไม่สำเร็จ")
+
+1. เข้า https://script.google.com > **โปรเจกต์ใหม่**
+2. วางโค้ดจาก `apps-script/Code.gs` ลงไฟล์ `Code.gs` (ลบโค้ดตัวอย่างออก)
+   (ถ้าจะใช้ LINE ด้วย ให้เพิ่มไฟล์ใหม่แล้ววาง `apps-script/LineNotify.gs` — Code.gs เรียกให้เองถ้ามีไฟล์นี้)
+3. เลือกฟังก์ชัน **setup** แล้วกด **Run** อนุญาตสิทธิ์ Sheets + Drive
+   ระบบสร้าง Google Sheet "BEN2 Maintenance - ใบแจ้งซ่อม" และโฟลเดอร์เก็บรูปใน Drive ให้เอง (ดู URL ของชีตใน Execution log)
+4. **Deploy > New deployment > Web app** — Execute as: **Me**, Who has access: **Anyone** แล้วคัดลอก URL ที่ลงท้าย `/exec`
+5. ใส่ URL นั้นที่บรรทัดแรกของ `app.js` (`SCRIPT_URL`) แล้ว commit / push
+
+เมื่อแก้โค้ด Apps Script ภายหลัง ต้อง **Deploy > Manage deployments > แก้ไข > New version** ใช้ URL เดิมต่อได้
 
 ## แจ้งเตือนเข้า LINE กลุ่ม
 
