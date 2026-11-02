@@ -117,7 +117,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
     min-height: 48px; padding: 0 1.4rem; border: 2px solid transparent; border-radius: 999px;
-    font-weight: 600; cursor: pointer; text-decoration: none; transition: transform var(--ease), filter var(--ease), background var(--ease);
+    font-weight: 600; cursor: pointer; text-decoration: none;
+    /* colour must fade together with the background, or outline buttons flash white-on-white on hover */
+    transition: transform var(--ease), filter var(--ease), background-color var(--ease), color var(--ease), border-color var(--ease);
 }
 .btn:active { transform: scale(0.98); }
 .btn[disabled], .btn[aria-disabled="true"] { opacity: 0.55; cursor: not-allowed; }
@@ -165,7 +167,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;
     min-height: 104px; padding: 0.75rem; text-align: center; text-decoration: none; cursor: pointer;
     background: var(--surface); color: var(--navy-deep); border: 2px solid var(--line); border-radius: var(--radius);
-    font-weight: 500; transition: border-color var(--ease), transform var(--ease), background var(--ease);
+    font-weight: 500; transition: border-color var(--ease), transform var(--ease), background-color var(--ease);
 }
 .tile i { font-size: 1.75rem; color: var(--navy); }
 .tile:hover { border-color: var(--navy); }
