@@ -156,31 +156,55 @@ function doGet(e) {
   }
 }
 
+// แจ้งเตือน (เช่น LINE) ต้องส่งหลังปล่อย lock เพื่อไม่ให้ API ภายนอกที่ช้าไปบล็อกผู้ใช้คนอื่น
+var pendingNotices_ = [];
+
+function queueNotice_(fn) {
+  pendingNotices_.push(fn);
+}
+
+function flushNotices_() {
+  var queue = pendingNotices_;
+  pendingNotices_ = [];
+  queue.forEach(function (fn) {
+    try { fn(); } catch (error) { console.error('notify failed: ' + error); }
+  });
+}
+
 function doPost(e) {
   var lock = LockService.getScriptLock();
   var locked = false;
+  var out;
   try {
     var d = JSON.parse(e.postData.contents);
-    if (d.action === 'login') return json_(login_(d));
-    if (d.action === 'list') {
-      if (!tokenOk_(d.token)) return json_(err_('unauthorized', 'กรุณาเข้าสู่ระบบ'));
-      return json_({ status: 'success', tickets: listTickets_(null) });
-    }
-    if (d.action === 'create' || d.action === 'update') {
+    if (!d.action && d.events) {
+      // webhook จาก LINE (ใช้หา groupId เท่านั้น ไม่มีผลข้างเคียง)
+      out = json_(typeof handleLineWebhook_ === 'function' ? handleLineWebhook_(d) : { status: 'success' });
+    } else if (d.action === 'login') {
+      out = json_(login_(d));
+    } else if (d.action === 'list') {
+      out = tokenOk_(d.token)
+        ? json_({ status: 'success', tickets: listTickets_(null) })
+        : json_(err_('unauthorized', 'กรุณาเข้าสู่ระบบ'));
+    } else if (d.action === 'create' || d.action === 'update') {
       if (d.action === 'update' && !tokenOk_(d.token)) {
-        return json_(err_('unauthorized', 'กรุณาเข้าสู่ระบบ'));
+        out = json_(err_('unauthorized', 'กรุณาเข้าสู่ระบบ'));
+      } else {
+        lock.waitLock(20000);
+        locked = true;
+        out = json_(d.action === 'create' ? createTicket_(d) : updateTicket_(d));
       }
-      lock.waitLock(20000);
-      locked = true;
-      return json_(d.action === 'create' ? createTicket_(d) : updateTicket_(d));
+    } else {
+      out = json_(err_('invalid', 'unknown action'));
     }
-    return json_(err_('invalid', 'unknown action'));
   } catch (error) {
     console.error(error);
-    return json_(err_('server', 'เกิดข้อผิดพลาดที่เซิร์ฟเวอร์'));
+    out = json_(err_('server', 'เกิดข้อผิดพลาดที่เซิร์ฟเวอร์'));
   } finally {
     if (locked) lock.releaseLock();
   }
+  flushNotices_();
+  return out;
 }
 
 /* ---------- Tickets ---------- */
@@ -259,8 +283,10 @@ function createTicket_(d) {
                    imageUrl, STATUSES[0], '', now]);
 
   if (typeof notifyNewTicket === 'function') {
-    notifyNewTicket({ ticket_id: ticketId, reporter_name: name, equipment_type: type,
-                      location: place, issue_detail: detail }, imageUrl);
+    queueNotice_(function () {
+      notifyNewTicket({ ticket_id: ticketId, reporter_name: name, equipment_type: type,
+                        location: place, issue_detail: detail }, imageUrl);
+    });
   }
   return { status: 'success', ticket_id: ticketId };
 }
@@ -276,7 +302,7 @@ function updateTicket_(d) {
   sheet.getRange(row, 8, 1, 3).setValues([[status, safeCell_(note), new Date()]]);
 
   if (typeof notifyTicketUpdate === 'function') {
-    notifyTicketUpdate({ ticket_id: id, status: status, admin_note: note });
+    queueNotice_(function () { notifyTicketUpdate({ ticket_id: id, status: status, admin_note: note }); });
   }
   return { status: 'success' };
 }
