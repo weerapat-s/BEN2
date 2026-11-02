@@ -1,59 +1,10 @@
 <!DOCTYPE html>
 <html lang="th">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>เข้าสู่ระบบผู้ดูแล - BEN2</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .login-container { min-height: 70vh; display: flex; align-items: center; justify-content: center; }
-        .login-card {
-            background: #fff;
-            border: 1px solid var(--line);
-            border-radius: 1rem;
-            padding: 2.5rem;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 10px 25px rgba(18, 40, 90, 0.15);
-            text-align: center;
-        }
-        .login-icon { font-size: 3rem; color: var(--primary); margin-bottom: 1.5rem; }
-        .form-control { padding: 1rem; border-radius: 10px; font-size: 1.1rem; margin-bottom: 1.5rem; text-align: center; letter-spacing: 2px; }
-    </style>
+    <meta http-equiv="refresh" content="0; url=admin.html">
+    <title>ย้ายไปที่หน้าช่าง</title>
+    <script>location.replace('admin.html');</script>
 </head>
-
-<body>
-    <div id="site-header"></div>
-
-    <div class="container animate-fade">
-
-        <div class="login-container">
-            <div class="login-card">
-                <i class="fas fa-user-shield login-icon"></i>
-                <h2 style="margin-bottom: 0.5rem; ">เข้าสู่ระบบช่างซ่อม</h2>
-                <p style="color: var(--text-muted); margin-bottom: 2rem; font-size: 0.9rem;">
-                    กรุณากรอกชื่อผู้ใช้งานและรหัสผ่านเพื่อเข้าสู่ระบบ
-                </p>
-
-                <form id="loginForm">
-                    <input type="text" id="adminUsername" class="form-control" placeholder="ชื่อผู้ใช้งาน" required autofocus>
-                    <input type="password" id="adminPassword" class="form-control" placeholder="รหัสผ่าน" required>
-                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem; border-radius: 10px;">
-                        <i class="fas fa-sign-in-alt"></i> ยืนยันการเข้าสู่ระบบ
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- SweetAlert2 (ใช้งานล่าสุดจากที่เพิ่มมาใน index.html) -->
-    <div id="site-footer"></div>
-
-    <script src="layout.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="app.js"></script>
-</body>
-
+<body><p><a href="admin.html">ไปที่หน้าช่าง</a></p></body>
 </html>

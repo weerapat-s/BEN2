@@ -2,58 +2,9 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ติดตามสถานะ - ระบบแจ้งซ่อม BEN2</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .table-container { padding: 1rem; margin-top: 1rem; }
-        th, td { padding: 1rem; }
-        th { white-space: nowrap; }
-        td { vertical-align: top; }
-    </style>
+    <meta http-equiv="refresh" content="0; url=index.html#/mine">
+    <title>ย้ายไปที่งานของฉัน</title>
+    <script>location.replace('index.html#/mine');</script>
 </head>
-<body>
-    <div id="site-header"></div>
-
-    <div class="container animate-fade">
-
-        <header style="padding: 2rem 0 1rem 0; text-align: left;">
-            <h2 style="display: flex; justify-content: space-between; align-items: center; margin: 0;">
-                <span><i class="fas fa-clipboard-list" style="color: var(--accent, #FFD700);"></i> รายการแจ้งซ่อมทั้งหมด</span>
-                <button onclick="loadDashboard()" class="btn btn-outline" style="padding: 0.5rem 1rem; ">
-                    <i class="fas fa-sync-alt"></i> รีเฟรชข้อมูล
-                </button>
-            </h2>
-        </header>
-
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>รหัสซ่อม</th>
-                        <th>อุปกรณ์ (สถานที่)</th>
-                        <th>ผู้แจ้ง</th>
-                        <th>สถานะ</th>
-                        <th>รูปภาพ</th>
-                    </tr>
-                </thead>
-                <tbody id="ticketTableBody">
-                    <tr><td colspan="5" style="text-align:center; padding: 2rem;">กำลังโหลดข้อมูล... <i class="fas fa-spinner fa-spin"></i></td></tr>
-                </tbody>
-            </table>
-        </div>
-        
-        <div style="text-align: center; margin-top: 2rem;">
-            <a href="index.html" class="btn btn-primary" style="text-decoration: none;">
-                <i class="fas fa-plus"></i> กลับไปหน้าแจ้งซ่อม
-            </a>
-        </div>
-    </div>
-
-    <div id="site-footer"></div>
-
-    <script src="layout.js"></script>
-    <script src="app.js"></script>
-</body>
+<body><p><a href="index.html#/mine">ไปที่งานของฉัน</a></p></body>
 </html>
