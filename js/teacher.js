@@ -2,6 +2,7 @@
 import { api, isDemo, ApiError } from './api.js';
 import { createStore } from './store.js';
 import { EQUIPMENT, STATUSES, chipsFor, statusMeta, relativeTime, safeImageUrl, appendChip } from './util.js';
+import { OTHER, roomLabel, filterRooms, findRoomByLabel } from './rooms.js';
 import { el, icon, clear, toast, copyText, brand, resizeImage, statusBadge } from './ui.js';
 
 const store = createStore();
@@ -15,7 +16,9 @@ let draft = newDraft();
 
 function newDraft(type = '') {
   const p = store.getProfile();
-  return { step: type ? 2 : 1, type, location: p.lastLocation, detail: '', name: p.name, imageData: null, sending: false, error: '', errors: {} };
+  // a remembered place that is not in the room list is shown as "other place" with its text
+  const otherPlace = !!p.lastLocation && !findRoomByLabel(p.lastLocation);
+  return { step: type ? 2 : 1, type, location: p.lastLocation, otherPlace, detail: '', name: p.name, imageData: null, sending: false, error: '', errors: {} };
 }
 
 const mount = (node) => { clear(view); view.append(node); };
@@ -93,6 +96,49 @@ function homeView() {
 
 /* ---------- Report flow ---------- */
 
+/** Room picker: search box + the school's room list, with an "other place" option for anything not listed. */
+function locationField() {
+  const filter = el('input', { class: 'input', type: 'search', id: 'f-room-filter', autocomplete: 'off',
+    placeholder: 'ค้นหาห้อง เช่น 234 หรือ LAB', 'aria-label': 'ค้นหาห้อง (พิมพ์เลขห้องหรือชื่อ)' });
+  const select = el('select', { class: 'select', id: 'f-loc', 'aria-invalid': draft.errors.location ? 'true' : null });
+  const other = el('input', { class: 'input', id: 'f-loc-other', maxlength: 200, autocomplete: 'off',
+    placeholder: 'ระบุสถานที่ เช่น สนามบาสเกตบอล', 'aria-label': 'ระบุสถานที่', value: draft.otherPlace ? draft.location : '',
+    oninput: (e) => { draft.location = e.target.value; } });
+  other.hidden = !draft.otherPlace;
+
+  function fill() {
+    const rooms = filterRooms(filter.value);
+    const picked = draft.otherPlace ? undefined : findRoomByLabel(draft.location);
+    const shown = picked && !rooms.includes(picked) ? [picked, ...rooms] : rooms; // keep the current choice visible while searching
+    clear(select).append(
+      el('option', { value: '' }, '— เลือกห้อง —'),
+      ...shown.map((r) => el('option', { value: roomLabel(r) }, roomLabel(r))),
+      el('option', { value: OTHER }, 'สถานที่อื่น (พิมพ์เอง)'));
+    select.value = draft.otherPlace ? OTHER : picked ? roomLabel(picked) : '';
+  }
+
+  select.addEventListener('change', () => {
+    draft.otherPlace = select.value === OTHER;
+    draft.location = draft.otherPlace ? other.value : select.value;
+    other.hidden = !draft.otherPlace;
+    if (draft.otherPlace) other.focus();
+  });
+  filter.addEventListener('input', () => {
+    fill();
+    const rooms = filterRooms(filter.value);
+    if (!draft.otherPlace && !draft.location && rooms.length === 1) { // one match and nothing chosen yet: choose it
+      draft.location = roomLabel(rooms[0]);
+      fill();
+    }
+  });
+  fill();
+
+  return el('div', { class: 'field' },
+    el('label', { class: 'label', for: 'f-loc' }, 'สถานที่ / ห้อง'),
+    el('div', { style: 'display:grid;gap:.5rem' }, filter, select, other),
+    draft.errors.location ? el('div', { class: 'error' }, draft.errors.location) : null);
+}
+
 function reportView() {
   if (sent) return successView();
   const body = el('div', { class: 'stack' });
@@ -112,8 +158,6 @@ function reportView() {
   }
 
   if (draft.step === 2) {
-    const locInput = el('input', { class: 'input', id: 'f-loc', value: draft.location, placeholder: 'เช่น อาคาร 1 ห้อง 114', maxlength: 200, autocomplete: 'off',
-      'aria-invalid': draft.errors.location ? 'true' : null, oninput: (e) => { draft.location = e.target.value; } });
     const detail = el('textarea', { class: 'textarea', id: 'f-detail', placeholder: 'อธิบายอาการที่พบ', maxlength: 2000,
       'aria-invalid': draft.errors.detail ? 'true' : null, oninput: (e) => { draft.detail = e.target.value; syncChips(); } }, draft.detail);
     const chipButtons = chipsFor(draft.type).map((c) => el('button', { class: 'chip', type: 'button', 'aria-pressed': 'false',
@@ -124,15 +168,14 @@ function reportView() {
       el('div', { class: 'card stack' },
         el('p', {}, el('span', { class: 'muted' }, 'อุปกรณ์: '), icon(equipmentOf(draft.type).icon), ' ', draft.type, ' ',
           el('button', { class: 'btn btn-ghost btn-sm', type: 'button', onclick: () => go(1) }, 'เปลี่ยน')),
-        el('label', { class: 'field' }, el('span', { class: 'label' }, 'สถานที่ / ห้อง'), locInput,
-          draft.errors.location ? el('div', { class: 'error' }, draft.errors.location) : null),
+        locationField(),
         el('div', { class: 'field' }, el('span', { class: 'label' }, 'อาการที่พบ'), el('div', { class: 'chips', style: 'margin-bottom:.6rem' }, chipButtons), detail,
           draft.errors.detail ? el('div', { class: 'error' }, draft.errors.detail) : null)),
       el('div', { class: 'row' },
         el('button', { class: 'btn btn-outline', type: 'button', onclick: () => go(1) }, 'ย้อนกลับ'),
         el('button', { class: 'btn btn-navy grow', type: 'button', onclick: () => {
           draft.errors = {};
-          if (!draft.location.trim()) draft.errors.location = 'กรุณาระบุสถานที่';
+          if (!draft.location.trim()) draft.errors.location = draft.otherPlace ? 'กรุณาระบุสถานที่' : 'กรุณาเลือกห้อง หรือเลือก "สถานที่อื่น" แล้วพิมพ์เอง';
           if (!draft.detail.trim()) draft.errors.detail = 'กรุณาระบุอาการ';
           if (Object.keys(draft.errors).length) return rerender();
           go(3);
