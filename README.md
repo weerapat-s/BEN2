@@ -92,6 +92,7 @@ index.html / js/teacher.js   แอปฝั่งครู (hash routes: #/ #/r
 admin.html / js/admin.js     แอปฝั่งช่าง
 js/api.js, demo-backend.js   ตัวเรียก backend + backend จำลอง
 js/util.js, store.js, ui.js  ฟังก์ชันช่วย / ข้อมูลในเครื่อง / DOM helper
+js/rooms-data.js, rooms.js   รายชื่อห้อง 135 ห้อง (แก้ห้องที่ rooms-data.js) + การค้นหา/ตัวเลือกห้อง
 styles.css                   design system
 apps-script/                 Code.gs (backend), LineNotify.gs
 scripts/                     make-school-bundle.ps1 (สร้างชุดไฟล์สำหรับเว็บโรงเรียน)
