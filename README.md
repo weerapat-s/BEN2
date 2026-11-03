@@ -78,6 +78,13 @@ python -m http.server 8000
 - การส่ง LINE เกิดหลังปล่อย lock แล้ว จึงไม่ทำให้คนอื่นที่แจ้งซ่อมพร้อมกันต้องรอ
 - ทดสอบอัตโนมัติ (`node --test`) ใช้ตัวจำลอง LINE API ไม่ได้ส่งข้อความจริง การส่งจริงต้องทดสอบด้วย `testLine`
 
+## ย้ายไปไว้ที่เว็บโรงเรียน (www.ben2.ac.th/repair)
+
+เว็บนี้เป็นไฟล์ static ที่ใช้พาธแบบสัมพัทธ์ทั้งหมด จึงวางไว้ใต้โฟลเดอร์ย่อยของเว็บโรงเรียนได้โดยไม่ต้องแก้โค้ด
+สร้างชุดไฟล์พร้อมอัปโหลดด้วย `powershell -ExecutionPolicy Bypass -File scripts/make-school-bundle.ps1`
+(ได้ `dist/repair/` และ `dist/ben2-repair-site.zip`) แล้วส่งให้ผู้ดูแลเว็บพร้อมคู่มือ [docs/school-site-handoff.md](docs/school-site-handoff.md)
+หลังย้ายแล้วตั้ง Script property `SITE_URL` ใน Apps Script เป็นที่อยู่ใหม่ เพื่อให้ลิงก์ใน LINE ชี้ถูกที่
+
 ## โครงสร้างไฟล์
 
 ```
@@ -87,5 +94,6 @@ js/api.js, demo-backend.js   ตัวเรียก backend + backend จำ�
 js/util.js, store.js, ui.js  ฟังก์ชันช่วย / ข้อมูลในเครื่อง / DOM helper
 styles.css                   design system
 apps-script/                 Code.gs (backend), LineNotify.gs
-docs/superpowers/            สเปกและแผนงานการออกแบบใหม่
+scripts/                     make-school-bundle.ps1 (สร้างชุดไฟล์สำหรับเว็บโรงเรียน)
+docs/                        school-site-handoff.md (คู่มือผู้ดูแลเว็บ), superpowers/ (สเปกและแผนงาน)
 ```
